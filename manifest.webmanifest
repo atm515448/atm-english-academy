@@ -1,0 +1,9 @@
+{
+  "name": "ATM English Academy Dictionary",
+  "short_name": "ATM Dictionary",
+  "start_url": "./dictionary.html",
+  "display": "standalone",
+  "background_color": "#f3f6fb",
+  "theme_color": "#102b55",
+  "description": "Offline English-Hausa bilingual dictionary"
+}
