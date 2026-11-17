@@ -1,12 +1,13 @@
 (() => {
   "use strict";
   const $ = id => document.getElementById(id);
-  const raw = (typeof dictionaryData !== "undefined" && Array.isArray(dictionaryData)) ? dictionaryData :
-              (typeof DICTIONARY_DATA !== "undefined" && Array.isArray(DICTIONARY_DATA)) ? DICTIONARY_DATA :
-              (typeof dictionary !== "undefined" && Array.isArray(dictionary)) ? dictionary :
-              Array.isArray(window.dictionaryData) ? window.dictionaryData :
-              Array.isArray(window.DICTIONARY_DATA) ? window.DICTIONARY_DATA :
-              Array.isArray(window.dictionary) ? window.dictionary : [];
+  const raw = Array.isArray(window.ATM_DICTIONARY) ? window.ATM_DICTIONARY :
+            (typeof dictionaryData !== "undefined" && Array.isArray(dictionaryData)) ? dictionaryData :
+            (typeof DICTIONARY_DATA !== "undefined" && Array.isArray(DICTIONARY_DATA)) ? DICTIONARY_DATA :
+            (typeof dictionary !== "undefined" && Array.isArray(dictionary)) ? dictionary :
+            Array.isArray(window.dictionaryData) ? window.dictionaryData :
+            Array.isArray(window.DICTIONARY_DATA) ? window.DICTIONARY_DATA :
+            Array.isArray(window.dictionary) ? window.dictionary : [];
   const words = raw.map((w,i)=>({
     id:String(w.id ?? i), en:String(w.en ?? w.english ?? "").trim(),
     ha:String(w.ha ?? w.hausa ?? "").trim(), type:w.type ?? w.pos ?? "",
