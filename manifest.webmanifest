@@ -1,9 +1,11 @@
 {
   "name": "ATM English Academy Dictionary",
   "short_name": "ATM Dictionary",
+  "description": "Offline English-Hausa and Hausa-English dictionary",
   "start_url": "./dictionary.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#f3f6fb",
   "theme_color": "#102b55",
-  "description": "Offline English-Hausa bilingual dictionary"
+  "icons": []
 }
