@@ -67,4 +67,4 @@
     "ATM Arabic Batch 1: " + updated + " entries updated."
   );
 })();
-                     
+      
