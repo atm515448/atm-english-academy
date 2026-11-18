@@ -15,6 +15,7 @@
 </header>
 <nav class="tabs" aria-label="Main navigation">
   <button class="tab active" data-page="search">Dictionary</button>
+  <button class="tab" data-page="allwords">All Words</button>
   <button class="tab" data-page="favorites">Favourites</button>
   <button class="tab" data-page="history">History</button>
   <button class="tab" data-page="settings">Settings</button>
@@ -32,14 +33,25 @@
     </div>
     <div id="results" class="results" aria-live="polite"></div>
     <div class="source-note">Translations are learning aids. Check context and regional usage for words with several meanings.</div>
-  </section>
-  <section id="page-favorites" class="page hidden">
-    <div class="intro"><span class="eyebrow">YOUR WORD LIST</span><h1>Favourites</h1><p>Words you have saved for revision.</p></div><div id="favoriteList" class="results"></div>
-  </section>
-  <section id="page-history" class="page hidden">
-    <div class="intro"><span class="eyebrow">RECENT LOOKUPS</span><h1>Search history</h1><p>Your recent searches are stored locally on this device.</p></div>
-    <div class="action-row"><button id="clearHistory" class="secondary">Clear history</button></div><div id="historyList" class="results"></div>
-  </section>
+  <section id="page-allwords" class="page hidden">
+  <div class="intro">
+    <span class="eyebrow">COMPLETE VOCABULARY COLLECTION</span>
+    <h1>All Words</h1>
+    <p>Browse every English–Hausa word in ATM English Academy.</p>
+  </div>
+    
+  <div class="search-panel">
+    <input id="allWordsSearch" type="search"
+      placeholder="Search all words..."
+      autocomplete="off">
+    <div class="small-row">
+      <span id="allWordsCount">Loading words...</span>
+      <span>A–Z</span>
+    </div>
+  </div>
+
+  <div id="allWordsList" class="results"></div>
+</section>
   <section id="page-settings" class="page hidden">
     <div class="intro"><span class="eyebrow">PERSONALISE YOUR DICTIONARY</span><h1>Settings</h1><p>Choose how ATM English Academy looks and behaves.</p></div>
     <div class="settings-card">
