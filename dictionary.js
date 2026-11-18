@@ -391,17 +391,37 @@
   }
 
  
+  
   // PAGE NAVIGATION
   function showPage(page) {
     activePage = page;
 
-    // Show the selected page and hide all others
+    // Show selected page and hide all others
     document.querySelectorAll(".page").forEach(element => {
       element.classList.toggle(
         "active",
         element.id === "page-" + page
       );
     });
+
+    // Highlight selected navigation button
+    document.querySelectorAll(".tab").forEach(button => {
+      button.classList.toggle(
+        "active",
+        button.dataset.page === page
+      );
+    });
+
+    // Refresh selected page content
+    if (page === "allwords") {
+      renderAllWords();
+    }
+
+    if (page === "favorites" || page === "history") {
+      renderSaved();
+    }
+  }
+
 
     // Highlight the selected navigation button
     document.querySelectorAll(".tab").forEach(button => {
