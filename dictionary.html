@@ -1,181 +1,199 @@
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#102b55">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="dictionary.css">
-  <title>ATM English Academy Dictionary</title>
+  <meta name="description" content="Learn English, Hausa and Arabic with ATM English Academy.">
+  <title>ATM English Academy</title>
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./dictionary.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
+
 <body>
+  <div class="app">
 
-<header class="top">
-  <div class="brand">
-    <div class="mark">ATM</div>
-    <div>
-      <b>ATM English Academy</b>
-      <small>English ↔ Hausa Dictionary</small>
-    </div>
-  </div>
-  <button id="themeQuick" class="icon-btn" aria-label="Toggle theme">☾</button>
-</header>
-
-<nav class="tabs" aria-label="Main navigation">
-  <button class="tab active" data-page="search">Dictionary</button>
-  <button class="tab" data-page="allwords">All Words</button>
-  <button class="tab" data-page="favorites">Favourites</button>
-  <button class="tab" data-page="history">History</button>
-  <button class="tab" data-page="settings">Settings</button>
-</nav>
-
-<main>
-
-  <!-- DICTIONARY PAGE -->
-  <section id="page-search" class="page">
-    <div class="intro">
-      <span class="eyebrow">OFFLINE BILINGUAL LOOKUP</span>
-      <h1>Find the right word.</h1>
-      <p>Search in English or Hausa. Your saved words stay on this device.</p>
-    </div>
-
-    <div class="search-panel">
-      <div class="direction">
-        <label for="direction">Dictionary direction</label>
-        <select id="direction">
-          <option value="en-ha">English → Hausa</option>
-          <option value="ha-en">Hausa → English</option>
-        </select>
+    <header class="header">
+      <div class="brand">
+        <div class="brand-logo">ATM</div>
+        <div>
+          <h1>ATM English Academy</h1>
+          <p>English • Hausa • العربية</p>
+        </div>
       </div>
 
-      <div class="searchbox">
-        <span>⌕</span>
-        <input id="searchInput" type="search"
-          placeholder="Type a word..." autocomplete="off">
-        <button id="clearSearch" aria-label="Clear search">×</button>
-      </div>
+      <button id="themeQuick" class="icon-button" type="button" aria-label="Change theme">
+        🌙
+      </button>
+    </header>
 
-      <div class="small-row">
-        <span id="countLabel">Loading dictionary…</span>
-        <span>Works offline</span>
-      </div>
-    </div>
+    <main>
+      <section class="welcome">
+        <p class="eyebrow">WELCOME TO YOUR LANGUAGE CENTRE</p>
+        <h2>Learn. Practise. Improve.</h2>
+        <p>Build your vocabulary in English, Hausa and Arabic.</p>
+      </section>
 
-    <div id="results" class="results" aria-live="polite"></div>
+      <nav class="tabs" aria-label="Main navigation">
+        <button class="tab active" data-page="search" type="button">Dictionary</button>
+        <button class="tab" data-page="allwords" type="button">All Words</button>
+        <button class="tab" data-page="quiz" type="button">Quiz</button>
+        <button class="tab" data-page="favorites" type="button">Favourites</button>
+        <button class="tab" data-page="history" type="button">History</button>
+        <button class="tab" data-page="settings" type="button">Settings</button>
+      </nav>
 
-    <div class="source-note">
-      Translations are learning aids. Check context and regional usage for words with several meanings.
-    </div>
-  </section>
+      <!-- DICTIONARY PAGE -->
+      <section id="page-search" class="page active">
 
-  <!-- ALL WORDS PAGE -->
-  <section id="page-allwords" class="page hidden">
-    <div class="intro">
-      <span class="eyebrow">COMPLETE VOCABULARY COLLECTION</span>
-      <h1>All Words</h1>
-      <p>Browse every English–Hausa word in ATM English Academy.</p>
-    </div>
+        <div id="dailyWord" class="daily-word"></div>
 
-    <div class="search-panel">
-      <input id="allWordsSearch" type="search"
-        placeholder="Search all words..." autocomplete="off">
-      <div class="small-row">
-        <span id="allWordsCount">Loading words...</span>
-        <span>A–Z</span>
-      </div>
-    </div>
+        <div class="search-panel">
+          <label for="direction">Choose translation direction</label>
 
-    <div id="allWordsList" class="results"></div>
-  </section>
+          <select id="direction">
+            <option value="en-ha">English → Hausa</option>
+            <option value="ha-en">Hausa → English</option>
+            <option value="en-ar">English → Arabic</option>
+            <option value="ar-en">Arabic → English</option>
+            <option value="ha-ar">Hausa → Arabic</option>
+            <option value="ar-ha">Arabic → Hausa</option>
+          </select>
 
-  <!-- FAVOURITES PAGE -->
-  <section id="page-favorites" class="page hidden">
-    <div class="intro">
-      <span class="eyebrow">YOUR PERSONAL COLLECTION</span>
-      <h1>Favourites</h1>
-      <p>Words you have saved for revision and practice.</p>
-    </div>
-    <div id="favoriteList" class="results"></div>
-  </section>
+          <label for="searchInput">Search vocabulary</label>
 
-  <!-- HISTORY PAGE -->
-  <section id="page-history" class="page hidden">
-    <div class="intro">
-      <span class="eyebrow">RECENT ACTIVITY</span>
-      <h1>Search History</h1>
-      <p>Review words you have searched for recently.</p>
-    </div>
-    <div id="historyList" class="results"></div>
-    <button id="clearHistory" class="secondary">Clear history</button>
-  </section>
+          <div class="search-box">
+            <input
+              id="searchInput"
+              type="search"
+              placeholder="Search English, Hausa or Arabic..."
+              autocomplete="off"
+            >
+            <button id="clearSearch" type="button">✕</button>
+          </div>
 
-  <!-- SETTINGS PAGE -->
-  <section id="page-settings" class="page hidden">
-    <div class="intro">
-      <span class="eyebrow">PERSONALISE YOUR DICTIONARY</span>
-      <h1>Settings</h1>
-      <p>Choose how ATM English Academy looks and behaves.</p>
-    </div>
+          <p id="countLabel" class="count-label">Search for a word</p>
+        </div>
 
-    <div class="settings-card">
-      <label class="setting">
-        <span><b>Appearance</b><small>Choose light or dark mode</small></span>
-        <select id="theme">
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-          <option value="system">System default</option>
-        </select>
-      </label>
+        <div id="results" class="results"></div>
+      </section>
 
-      <label class="setting">
-        <span><b>Text size</b><small>Adjust reading comfort</small></span>
-        <select id="fontSize">
-          <option value="small">Small</option>
-          <option value="medium">Medium</option>
-          <option value="large">Large</option>
-          <option value="xlarge">Extra large</option>
-        </select>
-      </label>
+      <!-- ALL WORDS PAGE -->
+      <section id="page-allwords" class="page">
+        <div class="section-heading">
+          <h2>All Vocabulary</h2>
+          <p>Explore available words in the dictionary.</p>
+        </div>
 
-      <label class="setting">
-        <span><b>Pronunciation</b><small>Use voices available on your phone</small></span>
-        <select id="voiceLang">
-          <option value="en">English</option>
-          <option value="ha">Hausa (if installed)</option>
-        </select>
-      </label>
+        <input
+          id="allWordsSearch"
+          type="search"
+          placeholder="Find a word..."
+        >
 
-      <label class="setting">
-        <span><b>Speak automatically</b><small>Read a word when you open it</small></span>
-        <input id="autoSpeak" type="checkbox">
-      </label>
-    </div>
+        <p id="allWordsCount" class="count-label"></p>
+        <div id="allWordsList" class="results"></div>
+      </section>
 
-    <div class="settings-card about">
-      <h2>About</h2>
-      <p><b>ATM English Academy</b></p>
-      <p>Created by Abdussalam Tahir</p>
-      <p>ATM Digital Solutions &amp; Services</p>
+      <!-- QUIZ PAGE -->
+      <section id="page-quiz" class="page">
+        <div class="section-heading">
+          <h2>English to Hausa Quiz</h2>
+          <p>Test your vocabulary knowledge.</p>
+        </div>
+
+        <button id="quizStart" class="primary-button" type="button">
+          Start Quiz
+        </button>
+
+        <div id="quizQuestion"></div>
+        <div id="quizOptions"></div>
+        <div id="quizFeedback" aria-live="polite"></div>
+      </section>
+
+      <!-- FAVOURITES PAGE -->
+      <section id="page-favorites" class="page">
+        <div class="section-heading">
+          <h2>My Favourites</h2>
+          <p>Your saved vocabulary.</p>
+        </div>
+
+        <div id="favoriteList" class="results"></div>
+      </section>
+
+      <!-- HISTORY PAGE -->
+      <section id="page-history" class="page">
+        <div class="section-heading">
+          <h2>Search History</h2>
+          <p>Previously searched words.</p>
+        </div>
+
+        <button id="clearHistory" class="secondary-button" type="button">
+          Clear History
+        </button>
+
+        <div id="historyList" class="results"></div>
+      </section>
+
+      <!-- SETTINGS PAGE -->
+      <section id="page-settings" class="page">
+        <div class="section-heading">
+          <h2>Settings</h2>
+          <p>Personalise your learning experience.</p>
+        </div>
+
+        <div class="settings-card">
+          <label for="theme">Appearance</label>
+          <select id="theme">
+            <option value="system">System default</option>
+            <option value="light">Light mode</option>
+            <option value="dark">Dark mode</option>
+          </select>
+
+          <label for="fontSize">Font size</label>
+          <select id="fontSize">
+            <option value="small">Small</option>
+            <option value="medium">Medium</option>
+            <option value="large">Large</option>
+          </select>
+
+          <label for="voiceLang">Pronunciation language</label>
+          <select id="voiceLang">
+            <option value="en">English</option>
+            <option value="ha">Hausa</option>
+            <option value="ar">Arabic</option>
+          </select>
+
+          <label class="setting-check">
+            <input id="autoSpeak" type="checkbox">
+            Automatically pronounce searched words
+          </label>
+
+          <button id="resetSettings" class="secondary-button" type="button">
+            Reset Settings
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <h3>ATM English Academy</h3>
+      <p>English • Hausa • Arabic</p>
+      <p>Learn a new word every day.</p>
+      <p>Powered by ATM Digital Solutions &amp; Services</p>
       <p>Contact: 08133515448</p>
-      <p class="muted">
-        Dictionary lookups, favourites and history are stored on this device.
-        No translation API is used.
-      </p>
-    </div>
+      <small>© 2026 ATM English Academy. All rights reserved.</small>
+    </footer>
 
-    <button id="resetSettings" class="secondary">Reset settings</button>
-  </section>
+  </div>
 
-</main>
-
-<footer>
-  © ATM English Academy · ATM Digital Solutions &amp; Services
-</footer>
-
-<script src="dictionary-data.js"></script>
-<script src="dictionary-extra-batch-1.js"></script>
-<script src="dictionary.js"></script>
-
+  <script src="./dictionary-data.js"></script>
+  <script src="./dictionary-extra-batch-1.js"></script>
+  <script src="./dictionary.js"></script>
 </body>
-</html>
+                                </html>
