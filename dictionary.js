@@ -66,7 +66,8 @@
     `).join("")
     : empty("No matching words found.");
 }
-    const list=activePage==="favorites"?words.filter(w=>favorites.includes(w.id)):
+ function renderSaved(){
+   const list=activePage==="favorites"?words.filter(w=>favorites.includes(w.id)):
       history.map(q=>words.find(w=>(w.en+" "+w.ha).toLowerCase().includes(q.toLowerCase()))).filter(Boolean);
     const target=activePage==="favorites"?"favoriteList":"historyList";
     $(target).innerHTML=list.length?list.map(card).join(""):empty(activePage==="favorites"?"You have not saved any words yet.":"No search history yet.");
