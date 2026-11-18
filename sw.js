@@ -1,4 +1,5 @@
-const CACHE_NAME = "atm-dictionary-v6";
+
+const CACHE_NAME = "atm-dictionary-v7";
 
 const CORE = [
   "./dictionary.html",
@@ -33,22 +34,48 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
 
+  const request = event.request;
+  const url = new URL(request.url);
+
+  const isAppFile =
+    url.pathname.endsWith(".html") ||
+    url.pathname.endsWith(".css") ||
+    url.pathname.endsWith(".js");
+
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
+    (async () => {
+      if (isAppFile) {
+        try {
+          const response = await fetch(request);
 
-      return fetch(event.request)
-        .then(response => {
           if (response.ok) {
-            const copy = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then(cache => cache.put(event.request, copy));
+            const cache = await caches.open(CACHE_NAME);
+            await cache.put(request, response.clone());
           }
 
           return response;
-        })
-        .catch(() => caches.match("./dictionary.html"));
-    })
+        } catch (error) {
+          const cached = await caches.match(request);
+          if (cached) return cached;
+          throw error;
+        }
+      }
+
+      const cached = await caches.match(request);
+      if (cached) return cached;
+
+      try {
+        const response = await fetch(request);
+
+        if (response.ok) {
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put(request, response.clone());
+        }
+
+        return response;
+      } catch (error) {
+        return caches.match("./dictionary.html");
+      }
+    })()
   );
 });
