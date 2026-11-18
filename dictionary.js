@@ -3,38 +3,63 @@
   "use strict";
 
   const $ = id => document.getElementById(id);
+  const on = (id, event, fn) => {
+    const el = $(id);
+    if (el) el.addEventListener(event, fn);
+  };
 
-  const raw = Array.isArray(window.ATM_DICTIONARY) ? window.ATM_DICTIONARY :
-    (typeof dictionaryData !== "undefined" && Array.isArray(dictionaryData)) ? dictionaryData :
-    (typeof DICTIONARY_DATA !== "undefined" && Array.isArray(DICTIONARY_DATA)) ? DICTIONARY_DATA :
-    (typeof dictionary !== "undefined" && Array.isArray(dictionary)) ? dictionary :
-    Array.isArray(window.dictionaryData) ? window.dictionaryData :
-    Array.isArray(window.DICTIONARY_DATA) ? window.DICTIONARY_DATA :
-    Array.isArray(window.dictionary) ? window.dictionary : [];
+  // LOAD EXISTING DICTIONARY DATA
+  const raw = Array.isArray(window.ATM_DICTIONARY)
+    ? window.ATM_DICTIONARY
+    : [];
+
+  // NORMALISE DATA AND REMOVE DUPLICATES
+  const seen = new Set();
 
   const words = raw.map((w, i) => ({
     id: String(w.id ?? i),
     en: String(w.en ?? w.english ?? "").trim(),
     ha: String(w.ha ?? w.hausa ?? "").trim(),
-    type: w.type ?? w.pos ?? "",
+    ar: String(w.ar ?? w.arabic ?? "").trim(),
+    type: w.type ?? w.pos ?? "Word",
     definition: w.definition ?? w.meaning ?? "",
+    definitionHa: w.definitionHa ?? "",
+    definitionAr: w.definitionAr ?? "",
     exampleEn: w.exampleEn ?? w.example_en ?? "",
     exampleHa: w.exampleHa ?? w.example_ha ?? "",
+    exampleAr: w.exampleAr ?? w.example_ar ?? "",
     synonyms: w.synonyms ?? [],
     antonyms: w.antonyms ?? [],
-    level: w.level ?? ""
-  })).filter(w => w.en || w.ha);
+    level: w.level ?? "Beginner"
+  })).filter(w => {
+    const key = w.en.toLowerCase();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 
-  const get = (k, d) => {
+  // LOCAL STORAGE
+  function get(key, fallback) {
     try {
-      return JSON.parse(localStorage.getItem("atmDict_" + k)) ?? d;
+      const value = JSON.parse(
+        localStorage.getItem("atmDict_" + key)
+      );
+      return value ?? fallback;
     } catch {
-      return d;
+      return fallback;
     }
-  };
+  }
 
-  const set = (k, v) =>
-    localStorage.setItem("atmDict_" + k, JSON.stringify(v));
+  function set(key, value) {
+    try {
+      localStorage.setItem(
+        "atmDict_" + key,
+        JSON.stringify(value)
+      );
+    } catch (error) {
+      console.warn("Could not save dictionary data:", error);
+    }
+  }
 
   let favorites = get("favorites", []);
   let history = get("history", []);
@@ -49,35 +74,27 @@
   let direction = "en-ha";
   let activePage = "search";
 
-  function applySettings() {
-    const dark = settings.theme === "dark" ||
-      (settings.theme === "system" &&
-      matchMedia("(prefers-color-scheme: dark)").matches);
+  // LANGUAGE HELPERS
+  const languages = {
+    en: { name: "English", voice: "en-GB" },
+    ha: { name: "Hausa", voice: "ha-NG" },
+    ar: { name: "Arabic", voice: "ar-SA" }
+  };
 
-    document.body.dataset.theme = dark ? "dark" : "light";
-    document.body.dataset.font = settings.fontSize || "medium";
-
-    $("theme").value = settings.theme;
-    $("fontSize").value = settings.fontSize;
-    $("voiceLang").value = settings.voiceLang;
-    $("autoSpeak").checked = !!settings.autoSpeak;
-    $("themeQuick").textContent = dark ? "☀" : "☾";
-  }
-
-  function saveSettings() {
-    settings = {
-      theme: $("theme").value,
-      fontSize: $("fontSize").value,
-      voiceLang: $("voiceLang").value,
-      autoSpeak: $("autoSpeak").checked
+  function languagePair() {
+    const parts = direction.split("-");
+    return {
+      first: parts[0] || "en",
+      second: parts[1] || "ha"
     };
-
-    set("settings", settings);
-    applySettings();
   }
 
-  function escapeHtml(s) {
-    return String(s ?? "").replace(/[&<>"']/g, c => ({
+  function languageText(word, lang) {
+    return word[lang] || "";
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, c => ({
       "&": "&amp;",
       "<": "&lt;",
       ">": "&gt;",
@@ -86,231 +103,431 @@
     }[c]));
   }
 
-  function arr(v) {
-    return Array.isArray(v) ? v :
-      (v ? String(v).split(/[,;]/).map(x => x.trim()).filter(Boolean) : []);
+  function arr(value) {
+    return Array.isArray(value)
+      ? value
+      : value
+        ? String(value).split(/[,;]/).map(x => x.trim()).filter(Boolean)
+        : [];
   }
 
-  function card(w) {
-    const saved = favorites.includes(w.id);
-    const main = direction === "en-ha" ? w.en : w.ha;
-    const trans = direction === "en-ha" ? w.ha : w.en;
+  function rtl(lang) {
+    return lang === "ar"
+      ? 'dir="rtl" lang="ar" class="arabic-text"'
+      : "";
+  }
+
+  // SETTINGS
+  function applySettings() {
+    const dark = settings.theme === "dark" ||
+      (settings.theme === "system" &&
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+    document.body.dataset.theme = dark ? "dark" : "light";
+    document.body.dataset.font = settings.fontSize || "medium";
+
+    if ($("theme")) $("theme").value = settings.theme;
+    if ($("fontSize")) $("fontSize").value = settings.fontSize;
+    if ($("voiceLang")) $("voiceLang").value = settings.voiceLang;
+    if ($("autoSpeak")) $("autoSpeak").checked = !!settings.autoSpeak;
+
+    if ($("themeQuick")) {
+      $("themeQuick").textContent = dark ? "☀" : "☾";
+    }
+  }
+
+  function saveSettings() {
+    settings = {
+      theme: $("theme")?.value || "system",
+      fontSize: $("fontSize")?.value || "medium",
+      voiceLang: $("voiceLang")?.value || "en",
+      autoSpeak: !!$("autoSpeak")?.checked
+    };
+
+    set("settings", settings);
+    applySettings();
+  }
+
+  // PRONUNCIATION
+  function speak(text, lang) {
+    if (!text || !("speechSynthesis" in window)) {
+      alert("Speech is not supported by this browser.");
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = languages[lang]?.voice || "en-GB";
+
+    const voices = speechSynthesis.getVoices();
+    const matchingVoice = voices.find(v =>
+      v.lang.toLowerCase().startsWith(lang)
+    );
+
+    if (matchingVoice) utterance.voice = matchingVoice;
+
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utterance);
+  }
+
+  // WORD CARD
+  function card(word) {
+    const saved = favorites.includes(word.id);
+    const pair = languagePair();
+
+    const firstText = languageText(word, pair.first);
+    const secondText = languageText(word, pair.second);
 
     return `
       <article class="word-card">
-        <div class="word-head">
-          <div>
-            <div class="meta">
-              ${escapeHtml(w.type || "Word")}
-              ${w.level ? " · " + escapeHtml(w.level) : ""}
-            </div>
-
-            <h2>${escapeHtml(main || "—")}</h2>
-
-            <div class="translation">
-              ${escapeHtml(trans || "Translation not available")}
-            </div>
-          </div>
+        <div class="meta">
+          ${escapeHtml(word.type)}
+          ${word.level ? " · " + escapeHtml(word.level) : ""}
         </div>
 
-        ${w.definition ? `
-          <p class="definition">${escapeHtml(w.definition)}</p>
-        ` : ""}
+        <div class="word-language">
+          <h2 ${rtl(pair.first)}>${escapeHtml(
+            firstText || "Translation not added yet"
+          )}</h2>
+          <button class="speak-btn"
+            data-speak="${escapeHtml(firstText)}"
+            data-lang="${pair.first}"
+            ${firstText ? "" : "disabled"}>
+            🔊 ${escapeHtml(languages[pair.first].name)}
+          </button>
+        </div>
 
-        ${w.exampleEn || w.exampleHa ? `
+        <div class="translation" ${rtl(pair.second)}>
+          ${escapeHtml(secondText || "Translation not added yet")}
+        </div>
+
+        <div class="all-translations">
+          <div><b>English:</b> ${escapeHtml(word.en || "—")}</div>
+          <div><b>Hausa:</b> <span>${escapeHtml(word.ha || "Ba a ƙara ba")}</span></div>
+          <div ${rtl("ar")}><b>العربية:</b> ${escapeHtml(word.ar || "لم تُضف الترجمة بعد")}</div>
+        </div>
+
+        ${word.definition ? `
+          <p class="definition">
+            <b>Meaning:</b> ${escapeHtml(word.definition)}
+          </p>` : ""}
+
+        ${word.definitionAr ? `
+          <p class="definition arabic-text" dir="rtl">
+            ${escapeHtml(word.definitionAr)}
+          </p>` : ""}
+
+        ${(word.exampleEn || word.exampleHa || word.exampleAr) ? `
           <div class="example">
-            <b>Example</b>
-            ${escapeHtml(w.exampleEn)}
-            ${w.exampleHa ? "<br>" + escapeHtml(w.exampleHa) : ""}
-          </div>
-        ` : ""}
+            <b>Example sentences</b>
+            ${word.exampleEn ? `<p>${escapeHtml(word.exampleEn)}</p>` : ""}
+            ${word.exampleHa ? `<p>${escapeHtml(word.exampleHa)}</p>` : ""}
+            ${word.exampleAr ? `<p class="arabic-text" dir="rtl">${escapeHtml(word.exampleAr)}</p>` : ""}
+          </div>` : ""}
 
-        ${arr(w.synonyms).length ? `
+        ${arr(word.synonyms).length ? `
           <div class="tags">
-            <b>Synonyms:</b> ${escapeHtml(arr(w.synonyms).join(", "))}
-          </div>
-        ` : ""}
+            <b>Synonyms:</b>
+            ${escapeHtml(arr(word.synonyms).join(", "))}
+          </div>` : ""}
 
-        ${arr(w.antonyms).length ? `
+        ${arr(word.antonyms).length ? `
           <div class="tags">
-            <b>Antonyms:</b> ${escapeHtml(arr(w.antonyms).join(", "))}
-          </div>
-        ` : ""}
+            <b>Antonyms:</b>
+            ${escapeHtml(arr(word.antonyms).join(", "))}
+          </div>` : ""}
 
         <div class="card-actions">
-          <button class="${saved ? "saved" : ""}" data-fav="${escapeHtml(w.id)}">
+          <button class="${saved ? "saved" : ""}"
+            data-fav="${escapeHtml(word.id)}">
             ${saved ? "♥ Saved" : "♡ Save"}
           </button>
 
-          <button data-speak="${escapeHtml(main)}">
-            🔊 Pronounce
+          <button data-speak="${escapeHtml(word.en)}" data-lang="en">
+            🔊 English
           </button>
+
+          ${word.ha ? `
+            <button data-speak="${escapeHtml(word.ha)}" data-lang="ha">
+              🔊 Hausa
+            </button>` : ""}
+
+          ${word.ar ? `
+            <button data-speak="${escapeHtml(word.ar)}" data-lang="ar">
+              🔊 Arabic
+            </button>` : ""}
         </div>
       </article>
     `;
   }
 
-  function empty(msg) {
-    return `<div class="empty">${escapeHtml(msg)}</div>`;
+  function empty(message) {
+    return `<div class="empty">${escapeHtml(message)}</div>`;
   }
 
-  function addHistory(q) {
+  // SEARCH HISTORY
+  function addHistory(query) {
     history = [
-      q,
-      ...history.filter(x => x.toLowerCase() !== q.toLowerCase())
+      query,
+      ...history.filter(
+        item => item.toLowerCase() !== query.toLowerCase()
+      )
     ].slice(0, 100);
 
     set("history", history);
   }
 
-  // DICTIONARY SEARCH
+  // SEARCH ACROSS ALL THREE LANGUAGES
   function search() {
-    const q = $("searchInput").value.trim().toLowerCase();
+    const input = $("searchInput");
+    if (!input || !$("results")) return;
 
-    $("countLabel").textContent =
-      `${words.length.toLocaleString()} entries loaded · offline`;
+    const query = input.value.trim().toLowerCase();
 
-    if (!q) {
+    if ($("countLabel")) {
+      $("countLabel").textContent =
+        `${words.length.toLocaleString()} unique words loaded`;
+    }
+
+    if (!query) {
       $("results").innerHTML =
-        empty("Search for an English or Hausa word to begin.");
+        empty("Search in English, Hausa or Arabic.");
       return;
     }
 
-    const found = words.filter(w =>
-      ((direction === "en-ha" ? w.en : w.ha) || "")
-        .toLowerCase().includes(q) ||
-      ((direction === "en-ha" ? w.ha : w.en) || "")
-        .toLowerCase().includes(q)
-    ).slice(0, 80);
+    const pair = languagePair();
+
+    const found = words.filter(word => {
+      const fields = [
+        word.en,
+        word.ha,
+        word.ar,
+        word.definition,
+        word.definitionHa,
+        word.definitionAr,
+        word.exampleEn,
+        word.exampleHa,
+        word.exampleAr
+      ];
+
+      return fields.some(value =>
+        String(value || "").toLowerCase().includes(query)
+      );
+    }).sort((a, b) => {
+      const aExact =
+        [a[pair.first], a[pair.second], a.en, a.ha, a.ar]
+          .some(v => String(v || "").toLowerCase() === query);
+
+      const bExact =
+        [b[pair.first], b[pair.second], b.en, b.ha, b.ar]
+          .some(v => String(v || "").toLowerCase() === query);
+
+      return Number(bExact) - Number(aExact);
+    }).slice(0, 80);
 
     $("results").innerHTML = found.length
       ? found.map(card).join("")
-      : empty("No matching word in the installed dictionary yet.");
+      : empty("No matching word found in the installed dictionary.");
+
+    if (settings.autoSpeak && found.length) {
+      const lang = settings.voiceLang || "en";
+      speak(found[0][lang], lang);
+    }
   }
 
   // ALL WORDS
   function renderAllWords() {
-    const q = $("allWordsSearch").value.trim().toLowerCase();
+    if (!$("allWordsList")) return;
 
-    const list = words
-      .filter(w =>
-        !q ||
-        w.en.toLowerCase().includes(q) ||
-        w.ha.toLowerCase().includes(q)
-      )
-      .sort((a, b) => a.en.localeCompare(b.en));
+    const query = ($("allWordsSearch")?.value || "")
+      .trim().toLowerCase();
 
-    $("allWordsCount").textContent =
-      `${list.length} of ${words.length} words`;
+    const list = words.filter(word => {
+      const fields = [
+        word.en, word.ha, word.ar,
+        word.definition, word.exampleEn,
+        word.exampleHa, word.exampleAr
+      ];
+
+      return !query || fields.some(value =>
+        String(value || "").toLowerCase().includes(query)
+      );
+    }).sort((a, b) => a.en.localeCompare(b.en));
+
+    if ($("allWordsCount")) {
+      $("allWordsCount").textContent =
+        `${list.length} of ${words.length} unique words`;
+    }
 
     $("allWordsList").innerHTML = list.length
-      ? list.map(w => `
-          <article class="word-card">
-            <div class="meta">
-              ${escapeHtml(w.type || "Word")}
-              ${w.level ? " · " + escapeHtml(w.level) : ""}
-            </div>
-
-            <h2>${escapeHtml(w.en)}</h2>
-
-            <div class="translation">
-              ${escapeHtml(w.ha || "Translation not available")}
-            </div>
-
-            ${w.definition ? `
-              <p class="definition">${escapeHtml(w.definition)}</p>
-            ` : ""}
-          </article>
-        `).join("")
+      ? list.map(card).join("")
       : empty("No matching words found.");
   }
 
   // FAVOURITES AND HISTORY
   function renderSaved() {
-    const list = activePage === "favorites"
-      ? words.filter(w => favorites.includes(w.id))
-      : history.map(q =>
-          words.find(w =>
-            (w.en + " " + w.ha).toLowerCase().includes(q.toLowerCase())
-          )
-        ).filter(Boolean);
+    const isFavorites = activePage === "favorites";
 
-    const target = activePage === "favorites"
-      ? "favoriteList"
-      : "historyList";
+    const list = isFavorites
+      ? words.filter(word => favorites.includes(word.id))
+      : history.map(query => {
+          const q = query.toLowerCase();
+          return words.find(word =>
+            [word.en, word.ha, word.ar].some(value =>
+              String(value || "").toLowerCase().includes(q)
+            )
+          );
+        }).filter(Boolean);
 
-    $(target).innerHTML = list.length
-      ? list.map(card).join("")
-      : empty(
-          activePage === "favorites"
-            ? "You have not saved any words yet."
-            : "No search history yet."
-        );
+    const target = isFavorites ? "favoriteList" : "historyList";
+
+    if ($(target)) {
+      $(target).innerHTML = list.length
+        ? list.map(card).join("")
+        : empty(isFavorites
+          ? "You have not saved any words yet."
+          : "No search history yet.");
+    }
   }
 
   // PAGE NAVIGATION
   function showPage(page) {
     activePage = page;
 
-    document.querySelectorAll(".page").forEach(p => {
-      p.classList.toggle("hidden", p.id !== "page-" + page);
+    document.querySelectorAll(".page").forEach(element => {
+      element.classList.toggle(
+        "hidden",
+        element.id !== "page-" + page
+      );
     });
 
-    document.querySelectorAll(".tab").forEach(b => {
-      b.classList.toggle("active", b.dataset.page === page);
+    document.querySelectorAll(".tab").forEach(button => {
+      button.classList.toggle(
+        "active",
+        button.dataset.page === page
+      );
     });
 
-    if (page === "allwords") {
-      renderAllWords();
-    } else if (page === "favorites" || page === "history") {
-      renderSaved();
-    }
+    if (page === "allwords") renderAllWords();
+    if (page === "favorites" || page === "history") renderSaved();
   }
 
-  // NAVIGATION BUTTONS
-  document.querySelectorAll(".tab").forEach(b => {
-    b.addEventListener("click", () => showPage(b.dataset.page));
+  // DAILY WORD
+  function renderDailyWord() {
+    const target = $("dailyWord");
+    if (!target || !words.length) return;
+
+    const today = new Date();
+    const dayNumber = Math.floor(
+      Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) /
+      86400000
+    );
+
+    const word = words[dayNumber % words.length];
+
+    target.innerHTML = `
+      <div class="meta">WORD OF THE DAY</div>
+      <h2>${escapeHtml(word.en)}</h2>
+      <p>${escapeHtml(word.ha || "Hausa translation coming soon")}</p>
+      <p class="arabic-text" dir="rtl">
+        ${escapeHtml(word.ar || "الترجمة العربية قريباً")}
+      </p>
+      <p>${escapeHtml(word.definition)}</p>
+    `;
+  }
+
+  // OPTIONAL QUIZ
+  let quizAnswer = null;
+
+  function startQuiz() {
+    const question = $("quizQuestion");
+    const options = $("quizOptions");
+    const feedback = $("quizFeedback");
+
+    if (!question || !options) return;
+
+    const available = words.filter(word => word.en && word.ha);
+    if (available.length < 4) {
+      question.textContent = "More vocabulary is needed for this quiz.";
+      return;
+    }
+
+    const correct = available[
+      Math.floor(Math.random() * available.length)
+    ];
+
+    const choices = [correct];
+
+    while (choices.length < 4) {
+      const candidate = available[
+        Math.floor(Math.random() * available.length)
+      ];
+
+      if (!choices.some(item => item.id === candidate.id)) {
+        choices.push(candidate);
+      }
+    }
+
+    choices.sort(() => Math.random() - 0.5);
+    quizAnswer = correct.id;
+
+    question.textContent = `What is the Hausa meaning of "${correct.en}"?`;
+
+    options.innerHTML = choices.map(word => `
+      <button class="quiz-option" data-quiz="${escapeHtml(word.id)}">
+        ${escapeHtml(word.ha)}
+      </button>
+    `).join("");
+
+    if (feedback) feedback.textContent = "";
+  }
+
+  // EVENT LISTENERS
+  document.querySelectorAll(".tab").forEach(button => {
+    button.addEventListener("click", () =>
+      showPage(button.dataset.page)
+    );
   });
 
-  // ALL WORDS SEARCH
-  $("allWordsSearch").addEventListener("input", renderAllWords);
+  on("searchInput", "input", search);
 
-  // LIVE DICTIONARY SEARCH
-  $("searchInput").addEventListener("input", search);
-
-  // SEARCH HISTORY
-  $("searchInput").addEventListener("change", () => {
-    const q = $("searchInput").value.trim();
-    if (q) addHistory(q);
+  on("searchInput", "change", () => {
+    const query = $("searchInput")?.value.trim();
+    if (query) addHistory(query);
   });
 
-  // DICTIONARY DIRECTION
-  $("direction").addEventListener("change", e => {
-    direction = e.target.value;
+  on("allWordsSearch", "input", renderAllWords);
+
+  on("direction", "change", event => {
+    direction = event.target.value;
     search();
+    renderAllWords();
+    if (activePage === "favorites" || activePage === "history") {
+      renderSaved();
+    }
   });
 
-  // CLEAR SEARCH
-  $("clearSearch").onclick = () => {
-    $("searchInput").value = "";
-    search();
-    $("searchInput").focus();
-  };
+  on("clearSearch", "click", () => {
+    if ($("searchInput")) {
+      $("searchInput").value = "";
+      search();
+      $("searchInput").focus();
+    }
+  });
 
-  // QUICK THEME BUTTON
-  $("themeQuick").onclick = () => {
-    $("theme").value =
-      document.body.dataset.theme === "dark" ? "light" : "dark";
+  on("themeQuick", "click", () => {
+    if ($("theme")) {
+      $("theme").value =
+        document.body.dataset.theme === "dark" ? "light" : "dark";
+      saveSettings();
+    }
+  });
 
-    saveSettings();
-  };
-
-  // SETTINGS
   ["theme", "fontSize", "voiceLang", "autoSpeak"].forEach(id => {
-    $(id).addEventListener("change", saveSettings);
+    on(id, "change", saveSettings);
   });
 
-  $("resetSettings").onclick = () => {
+  on("resetSettings", "click", () => {
     settings = {
       theme: "system",
       fontSize: "medium",
@@ -320,63 +537,80 @@
 
     set("settings", settings);
     applySettings();
-  };
+  });
 
-  // CLEAR HISTORY
-  $("clearHistory").onclick = () => {
+  on("clearHistory", "click", () => {
     history = [];
     set("history", history);
     renderSaved();
-  };
+  });
 
-  // FAVOURITES AND PRONUNCIATION
-  document.addEventListener("click", e => {
-    const fav = e.target.closest("[data-fav]");
+  on("quizStart", "click", startQuiz);
+
+  // CARD BUTTONS AND QUIZ ANSWERS
+  document.addEventListener("click", event => {
+    const fav = event.target.closest("[data-fav]");
 
     if (fav) {
       const id = fav.dataset.fav;
 
       favorites = favorites.includes(id)
-        ? favorites.filter(x => x !== id)
+        ? favorites.filter(item => item !== id)
         : [...favorites, id];
 
       set("favorites", favorites);
 
-      if (activePage === "search") {
-        search();
-      } else {
-        renderSaved();
-      }
+      if (activePage === "search") search();
+      else if (activePage === "allwords") renderAllWords();
+      else renderSaved();
 
       return;
     }
 
-    const speak = e.target.closest("[data-speak]");
+    const speakButton = event.target.closest("[data-speak]");
 
-    if (speak) {
-      if (!("speechSynthesis" in window)) {
-        alert("Speech is not supported by this browser.");
-        return;
+    if (speakButton) {
+      speak(
+        speakButton.dataset.speak,
+        speakButton.dataset.lang || "en"
+      );
+      return;
+    }
+
+    const quizButton = event.target.closest("[data-quiz]");
+
+    if (quizButton && quizAnswer !== null) {
+      const feedback = $("quizFeedback");
+      const correct = quizButton.dataset.quiz === quizAnswer;
+
+      if (feedback) {
+        feedback.textContent = correct
+          ? "Correct! Well done."
+          : "Not correct. Try another question.";
       }
 
-      const u = new SpeechSynthesisUtterance(speak.dataset.speak);
-      u.lang = settings.voiceLang === "ha" ? "ha-NG" : "en-US";
-
-      speechSynthesis.cancel();
-      speechSynthesis.speak(u);
+      document.querySelectorAll("[data-quiz]").forEach(button => {
+        button.disabled = true;
+      });
     }
   });
 
-  // OFFLINE SERVICE WORKER
+  // OFFLINE SUPPORT
   if ("serviceWorker" in navigator &&
       location.protocol.startsWith("http")) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js").catch(() => {});
+      navigator.serviceWorker.register("./sw.js").catch(error => {
+        console.warn("Offline registration failed:", error);
+      });
     });
   }
 
-  // START APP
+  // START APPLICATION
   applySettings();
   search();
+  renderDailyWord();
 
+  console.log(
+    `ATM English Academy ready: ${words.length} unique entries loaded.`
+  );
 })();
