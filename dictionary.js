@@ -3,12 +3,13 @@
   "use strict";
 
   const $ = id => document.getElementById(id);
+
   const on = (id, event, fn) => {
     const el = $(id);
     if (el) el.addEventListener(event, fn);
   };
 
-  // LOAD EXISTING DICTIONARY DATA
+  // LOAD DICTIONARY DATA
   const raw = Array.isArray(window.ATM_DICTIONARY)
     ? window.ATM_DICTIONARY
     : [];
@@ -64,6 +65,9 @@
   let favorites = get("favorites", []);
   let history = get("history", []);
 
+  if (!Array.isArray(favorites)) favorites = [];
+  if (!Array.isArray(history)) history = [];
+
   let settings = get("settings", {
     theme: "system",
     fontSize: "medium",
@@ -74,7 +78,7 @@
   let direction = "en-ha";
   let activePage = "search";
 
-  // LANGUAGE HELPERS
+  // LANGUAGES
   const languages = {
     en: { name: "English", voice: "en-GB" },
     ha: { name: "Hausa", voice: "ha-NG" },
@@ -117,19 +121,23 @@
       : "";
   }
 
-  // SETTINGS
+  // SETTINGS AND SYSTEM THEME
+  const systemTheme = window.matchMedia
+    ? window.matchMedia("(prefers-color-scheme: dark)")
+    : null;
+
   function applySettings() {
     const dark = settings.theme === "dark" ||
       (settings.theme === "system" &&
-        window.matchMedia &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches);
+        systemTheme &&
+        systemTheme.matches);
 
     document.body.dataset.theme = dark ? "dark" : "light";
     document.body.dataset.font = settings.fontSize || "medium";
 
-    if ($("theme")) $("theme").value = settings.theme;
-    if ($("fontSize")) $("fontSize").value = settings.fontSize;
-    if ($("voiceLang")) $("voiceLang").value = settings.voiceLang;
+    if ($("theme")) $("theme").value = settings.theme || "system";
+    if ($("fontSize")) $("fontSize").value = settings.fontSize || "medium";
+    if ($("voiceLang")) $("voiceLang").value = settings.voiceLang || "en";
     if ($("autoSpeak")) $("autoSpeak").checked = !!settings.autoSpeak;
 
     if ($("themeQuick")) {
@@ -147,6 +155,21 @@
 
     set("settings", settings);
     applySettings();
+  }
+
+  // AUTOMATICALLY FOLLOW PHONE SYSTEM THEME
+  if (systemTheme) {
+    const handleSystemThemeChange = () => {
+      if (settings.theme === "system") {
+        applySettings();
+      }
+    };
+
+    if (systemTheme.addEventListener) {
+      systemTheme.addEventListener("change", handleSystemThemeChange);
+    } else if (systemTheme.addListener) {
+      systemTheme.addListener(handleSystemThemeChange);
+    }
   }
 
   // PRONUNCIATION
@@ -186,9 +209,10 @@
         </div>
 
         <div class="word-language">
-          <h2 ${rtl(pair.first)}>${escapeHtml(
-            firstText || "Translation not added yet"
-          )}</h2>
+          <h2 ${rtl(pair.first)}>
+            ${escapeHtml(firstText || "Translation not added yet")}
+          </h2>
+
           <button class="speak-btn"
             data-speak="${escapeHtml(firstText)}"
             data-lang="${pair.first}"
@@ -203,7 +227,7 @@
 
         <div class="all-translations">
           <div><b>English:</b> ${escapeHtml(word.en || "—")}</div>
-          <div><b>Hausa:</b> <span>${escapeHtml(word.ha || "Ba a ƙara ba")}</span></div>
+          <div><b>Hausa:</b> ${escapeHtml(word.ha || "Ba a ƙara ba")}</div>
           <div ${rtl("ar")}><b>العربية:</b> ${escapeHtml(word.ar || "لم تُضف الترجمة بعد")}</div>
         </div>
 
@@ -277,7 +301,7 @@
     set("history", history);
   }
 
-  // SEARCH ACROSS ALL THREE LANGUAGES
+  // SEARCH ALL THREE LANGUAGES
   function search() {
     const input = $("searchInput");
     if (!input || !$("results")) return;
@@ -299,15 +323,9 @@
 
     const found = words.filter(word => {
       const fields = [
-        word.en,
-        word.ha,
-        word.ar,
-        word.definition,
-        word.definitionHa,
-        word.definitionAr,
-        word.exampleEn,
-        word.exampleHa,
-        word.exampleAr
+        word.en, word.ha, word.ar,
+        word.definition, word.definitionHa, word.definitionAr,
+        word.exampleEn, word.exampleHa, word.exampleAr
       ];
 
       return fields.some(value =>
@@ -390,13 +408,10 @@
     }
   }
 
- 
-  
-  // PAGE NAVIGATION
+  // PAGE NAVIGATION - CORRECTED
   function showPage(page) {
     activePage = page;
 
-    // Show selected page and hide all others
     document.querySelectorAll(".page").forEach(element => {
       element.classList.toggle(
         "active",
@@ -404,7 +419,6 @@
       );
     });
 
-    // Highlight selected navigation button
     document.querySelectorAll(".tab").forEach(button => {
       button.classList.toggle(
         "active",
@@ -412,7 +426,6 @@
       );
     });
 
-    // Refresh selected page content
     if (page === "allwords") {
       renderAllWords();
     }
@@ -420,45 +433,6 @@
     if (page === "favorites" || page === "history") {
       renderSaved();
     }
-  }
-
-
-    // Highlight the selected navigation button
-    document.querySelectorAll(".tab").forEach(button => {
-      button.classList.toggle(
-        "active",
-        button.dataset.page === page
-      );
-    });
-
-    // Refresh the content of the selected page
-    if (page === "allwords") {
-      renderAllWords();
-    }
-
-    if (page === "favorites" || page === "history") {
-      renderSaved();
-    }
-  }
-
-    activePage = page;
-
-    document.querySelectorAll(".page").forEach(element => {
-      element.classList.toggle(
-        "hidden",
-        element.id !== "page-" + page
-      );
-    });
-
-    document.querySelectorAll(".tab").forEach(button => {
-      button.classList.toggle(
-        "active",
-        button.dataset.page === page
-      );
-    });
-
-    if (page === "allwords") renderAllWords();
-    if (page === "favorites" || page === "history") renderSaved();
   }
 
   // DAILY WORD
@@ -485,7 +459,7 @@
     `;
   }
 
-  // OPTIONAL QUIZ
+  // QUIZ
   let quizAnswer = null;
 
   function startQuiz() {
@@ -496,6 +470,7 @@
     if (!question || !options) return;
 
     const available = words.filter(word => word.en && word.ha);
+
     if (available.length < 4) {
       question.textContent = "More vocabulary is needed for this quiz.";
       return;
@@ -520,7 +495,8 @@
     choices.sort(() => Math.random() - 0.5);
     quizAnswer = correct.id;
 
-    question.textContent = `What is the Hausa meaning of "${correct.en}"?`;
+    question.textContent =
+      `What is the Hausa meaning of "${correct.en}"?`;
 
     options.innerHTML = choices.map(word => `
       <button class="quiz-option" data-quiz="${escapeHtml(word.id)}">
@@ -531,13 +507,14 @@
     if (feedback) feedback.textContent = "";
   }
 
-  // EVENT LISTENERS
+  // NAVIGATION EVENTS
   document.querySelectorAll(".tab").forEach(button => {
-    button.addEventListener("click", () =>
-      showPage(button.dataset.page)
-    );
+    button.addEventListener("click", () => {
+      showPage(button.dataset.page);
+    });
   });
 
+  // SEARCH EVENTS
   on("searchInput", "input", search);
 
   on("searchInput", "change", () => {
@@ -551,6 +528,7 @@
     direction = event.target.value;
     search();
     renderAllWords();
+
     if (activePage === "favorites" || activePage === "history") {
       renderSaved();
     }
@@ -564,14 +542,16 @@
     }
   });
 
+  // QUICK THEME SWITCH
   on("themeQuick", "click", () => {
-    if ($("theme")) {
-      $("theme").value =
-        document.body.dataset.theme === "dark" ? "light" : "dark";
-      saveSettings();
-    }
+    settings.theme =
+      document.body.dataset.theme === "dark" ? "light" : "dark";
+
+    set("settings", settings);
+    applySettings();
   });
 
+  // SETTINGS EVENTS
   ["theme", "fontSize", "voiceLang", "autoSpeak"].forEach(id => {
     on(id, "change", saveSettings);
   });
@@ -588,17 +568,22 @@
     applySettings();
   });
 
+  // CLEAR HISTORY
   on("clearHistory", "click", () => {
     history = [];
     set("history", history);
     renderSaved();
   });
 
+  // QUIZ EVENT
   on("quizStart", "click", startQuiz);
 
   // CARD BUTTONS AND QUIZ ANSWERS
   document.addEventListener("click", event => {
-    const fav = event.target.closest("[data-fav]");
+    const target = event.target;
+    if (!target.closest) return;
+
+    const fav = target.closest("[data-fav]");
 
     if (fav) {
       const id = fav.dataset.fav;
@@ -616,7 +601,7 @@
       return;
     }
 
-    const speakButton = event.target.closest("[data-speak]");
+    const speakButton = target.closest("[data-speak]");
 
     if (speakButton) {
       speak(
@@ -626,7 +611,7 @@
       return;
     }
 
-    const quizButton = event.target.closest("[data-quiz]");
+    const quizButton = target.closest("[data-quiz]");
 
     if (quizButton && quizAnswer !== null) {
       const feedback = $("quizFeedback");
@@ -656,6 +641,7 @@
 
   // START APPLICATION
   applySettings();
+  showPage("search");
   search();
   renderDailyWord();
 
@@ -663,4 +649,4 @@
     `ATM English Academy ready: ${words.length} unique entries loaded.`
   );
 })();
-        
+  
