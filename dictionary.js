@@ -45,19 +45,46 @@
     const found=words.filter(w=>((direction==="en-ha"?w.en:w.ha)||"").toLowerCase().includes(q) || ((direction==="en-ha"?w.ha:w.en)||"").toLowerCase().includes(q)).slice(0,80);
     $("results").innerHTML=found.length?found.map(card).join(""):empty("No matching word in the installed dictionary yet.");
   }
-  function renderSaved(){
+  function renderAllWords(){
+  const q=$("allWordsSearch").value.trim().toLowerCase();
+
+  const list=words
+    .filter(w=>!q || w.en.toLowerCase().includes(q) || w.ha.toLowerCase().includes(q))
+    .sort((a,b)=>a.en.localeCompare(b.en));
+
+  $("allWordsCount").textContent=
+    `${list.length} of ${words.length} words`;
+
+  $("allWordsList").innerHTML=list.length
+    ? list.map(w=>`
+      <article class="word-card">
+        <div class="meta">${escapeHtml(w.type||"Word")} ${w.level?"· "+escapeHtml(w.level):""}</div>
+        <h2>${escapeHtml(w.en)}</h2>
+        <div class="translation">${escapeHtml(w.ha||"Translation not available")}</div>
+        ${w.definition?`<p class="definition">${escapeHtml(w.definition)}</p>`:""}
+      </article>
+    `).join("")
+    : empty("No matching words found.");
+}
     const list=activePage==="favorites"?words.filter(w=>favorites.includes(w.id)):
       history.map(q=>words.find(w=>(w.en+" "+w.ha).toLowerCase().includes(q.toLowerCase()))).filter(Boolean);
     const target=activePage==="favorites"?"favoriteList":"historyList";
     $(target).innerHTML=list.length?list.map(card).join(""):empty(activePage==="favorites"?"You have not saved any words yet.":"No search history yet.");
   }
   function showPage(page){
-    activePage=page;document.querySelectorAll(".page").forEach(p=>p.classList.toggle("hidden",p.id!=="page-"+page));
-    document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
-    if(page!=="search")renderSaved();
-  }
+  activePage=page;
+  document.querySelectorAll(".page").forEach(p=>
+    p.classList.toggle("hidden",p.id!=="page-"+page)
+  );
+  document.querySelectorAll(".tab").forEach(b=>
+    b.classList.toggle("active",b.dataset.page===page)
+  );
+
+  if(page==="allwords") renderAllWords();
+  else if(page==="favorites" || page==="history") renderSaved();
+}
   document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
-  $("searchInput").addEventListener("input",search);
+  $("allWordsSearch").addEventListener("input",renderAllWords);
   $("searchInput").addEventListener("change",()=>{if($("searchInput").value.trim())addHistory($("searchInput").value.trim())});
   $("direction").addEventListener("change",e=>{direction=e.target.value;search()});
   $("clearSearch").onclick=()=>{$("searchInput").value="";search();$("searchInput").focus()};
