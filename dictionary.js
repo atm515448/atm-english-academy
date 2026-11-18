@@ -390,8 +390,37 @@
     }
   }
 
+ 
   // PAGE NAVIGATION
   function showPage(page) {
+    activePage = page;
+
+    // Show the selected page and hide all others
+    document.querySelectorAll(".page").forEach(element => {
+      element.classList.toggle(
+        "active",
+        element.id === "page-" + page
+      );
+    });
+
+    // Highlight the selected navigation button
+    document.querySelectorAll(".tab").forEach(button => {
+      button.classList.toggle(
+        "active",
+        button.dataset.page === page
+      );
+    });
+
+    // Refresh the content of the selected page
+    if (page === "allwords") {
+      renderAllWords();
+    }
+
+    if (page === "favorites" || page === "history") {
+      renderSaved();
+    }
+  }
+
     activePage = page;
 
     document.querySelectorAll(".page").forEach(element => {
