@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -9,10 +10,18 @@
   <title>ATM English Academy Dictionary</title>
 </head>
 <body>
+
 <header class="top">
-  <div class="brand"><div class="mark">ATM</div><div><b>ATM English Academy</b><small>English ↔ Hausa Dictionary</small></div></div>
+  <div class="brand">
+    <div class="mark">ATM</div>
+    <div>
+      <b>ATM English Academy</b>
+      <small>English ↔ Hausa Dictionary</small>
+    </div>
+  </div>
   <button id="themeQuick" class="icon-btn" aria-label="Toggle theme">☾</button>
 </header>
+
 <nav class="tabs" aria-label="Main navigation">
   <button class="tab active" data-page="search">Dictionary</button>
   <button class="tab" data-page="allwords">All Words</button>
@@ -20,53 +29,153 @@
   <button class="tab" data-page="history">History</button>
   <button class="tab" data-page="settings">Settings</button>
 </nav>
+
 <main>
+
+  <!-- DICTIONARY PAGE -->
   <section id="page-search" class="page">
-    <div class="intro"><span class="eyebrow">OFFLINE BILINGUAL LOOKUP</span><h1>Find the right word.</h1><p>Search in English or Hausa. Your saved words stay on this device.</p></div>
+    <div class="intro">
+      <span class="eyebrow">OFFLINE BILINGUAL LOOKUP</span>
+      <h1>Find the right word.</h1>
+      <p>Search in English or Hausa. Your saved words stay on this device.</p>
+    </div>
+
     <div class="search-panel">
       <div class="direction">
         <label for="direction">Dictionary direction</label>
-        <select id="direction"><option value="en-ha">English → Hausa</option><option value="ha-en">Hausa → English</option></select>
+        <select id="direction">
+          <option value="en-ha">English → Hausa</option>
+          <option value="ha-en">Hausa → English</option>
+        </select>
       </div>
-      <div class="searchbox"><span>⌕</span><input id="searchInput" type="search" placeholder="Type a word..." autocomplete="off"><button id="clearSearch" aria-label="Clear search">×</button></div>
-      <div class="small-row"><span id="countLabel">Loading dictionary…</span><span>Works offline</span></div>
-    </div>
-    <div id="results" class="results" aria-live="polite"></div>
-    <div class="source-note">Translations are learning aids. Check context and regional usage for words with several meanings.</div>
-  <section id="page-allwords" class="page hidden">
-  <div class="intro">
-    <span class="eyebrow">COMPLETE VOCABULARY COLLECTION</span>
-    <h1>All Words</h1>
-    <p>Browse every English–Hausa word in ATM English Academy.</p>
-  </div>
-    
-  <div class="search-panel">
-    <input id="allWordsSearch" type="search"
-      placeholder="Search all words..."
-      autocomplete="off">
-    <div class="small-row">
-      <span id="allWordsCount">Loading words...</span>
-      <span>A–Z</span>
-    </div>
-  </div>
 
-  <div id="allWordsList" class="results"></div>
-</section>
-  <section id="page-settings" class="page hidden">
-    <div class="intro"><span class="eyebrow">PERSONALISE YOUR DICTIONARY</span><h1>Settings</h1><p>Choose how ATM English Academy looks and behaves.</p></div>
-    <div class="settings-card">
-      <label class="setting"><span><b>Appearance</b><small>Choose light or dark mode</small></span><select id="theme"><option value="light">Light</option><option value="dark">Dark</option><option value="system">System default</option></select></label>
-      <label class="setting"><span><b>Text size</b><small>Adjust reading comfort</small></span><select id="fontSize"><option value="small">Small</option><option value="medium">Medium</option><option value="large">Large</option><option value="xlarge">Extra large</option></select></label>
-      <label class="setting"><span><b>Pronunciation</b><small>Use voices available on your phone</small></span><select id="voiceLang"><option value="en">English</option><option value="ha">Hausa (if installed)</option></select></label>
-      <label class="setting"><span><b>Speak automatically</b><small>Read a word when you open it</small></span><input id="autoSpeak" type="checkbox"></label>
+      <div class="searchbox">
+        <span>⌕</span>
+        <input id="searchInput" type="search"
+          placeholder="Type a word..." autocomplete="off">
+        <button id="clearSearch" aria-label="Clear search">×</button>
+      </div>
+
+      <div class="small-row">
+        <span id="countLabel">Loading dictionary…</span>
+        <span>Works offline</span>
+      </div>
     </div>
-    <div class="settings-card about"><h2>About</h2><p><b>ATM English Academy</b></p><p>Created by Abdussalam Tahir</p><p>ATM Digital Solutions &amp; Services</p><p>Contact: 08133515448</p><p class="muted">Dictionary lookups, favourites and history are stored on this device. No translation API is used.</p></div>
+
+    <div id="results" class="results" aria-live="polite"></div>
+
+    <div class="source-note">
+      Translations are learning aids. Check context and regional usage for words with several meanings.
+    </div>
+  </section>
+
+  <!-- ALL WORDS PAGE -->
+  <section id="page-allwords" class="page hidden">
+    <div class="intro">
+      <span class="eyebrow">COMPLETE VOCABULARY COLLECTION</span>
+      <h1>All Words</h1>
+      <p>Browse every English–Hausa word in ATM English Academy.</p>
+    </div>
+
+    <div class="search-panel">
+      <input id="allWordsSearch" type="search"
+        placeholder="Search all words..." autocomplete="off">
+      <div class="small-row">
+        <span id="allWordsCount">Loading words...</span>
+        <span>A–Z</span>
+      </div>
+    </div>
+
+    <div id="allWordsList" class="results"></div>
+  </section>
+
+  <!-- FAVOURITES PAGE -->
+  <section id="page-favorites" class="page hidden">
+    <div class="intro">
+      <span class="eyebrow">YOUR PERSONAL COLLECTION</span>
+      <h1>Favourites</h1>
+      <p>Words you have saved for revision and practice.</p>
+    </div>
+    <div id="favoriteList" class="results"></div>
+  </section>
+
+  <!-- HISTORY PAGE -->
+  <section id="page-history" class="page hidden">
+    <div class="intro">
+      <span class="eyebrow">RECENT ACTIVITY</span>
+      <h1>Search History</h1>
+      <p>Review words you have searched for recently.</p>
+    </div>
+    <div id="historyList" class="results"></div>
+    <button id="clearHistory" class="secondary">Clear history</button>
+  </section>
+
+  <!-- SETTINGS PAGE -->
+  <section id="page-settings" class="page hidden">
+    <div class="intro">
+      <span class="eyebrow">PERSONALISE YOUR DICTIONARY</span>
+      <h1>Settings</h1>
+      <p>Choose how ATM English Academy looks and behaves.</p>
+    </div>
+
+    <div class="settings-card">
+      <label class="setting">
+        <span><b>Appearance</b><small>Choose light or dark mode</small></span>
+        <select id="theme">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="system">System default</option>
+        </select>
+      </label>
+
+      <label class="setting">
+        <span><b>Text size</b><small>Adjust reading comfort</small></span>
+        <select id="fontSize">
+          <option value="small">Small</option>
+          <option value="medium">Medium</option>
+          <option value="large">Large</option>
+          <option value="xlarge">Extra large</option>
+        </select>
+      </label>
+
+      <label class="setting">
+        <span><b>Pronunciation</b><small>Use voices available on your phone</small></span>
+        <select id="voiceLang">
+          <option value="en">English</option>
+          <option value="ha">Hausa (if installed)</option>
+        </select>
+      </label>
+
+      <label class="setting">
+        <span><b>Speak automatically</b><small>Read a word when you open it</small></span>
+        <input id="autoSpeak" type="checkbox">
+      </label>
+    </div>
+
+    <div class="settings-card about">
+      <h2>About</h2>
+      <p><b>ATM English Academy</b></p>
+      <p>Created by Abdussalam Tahir</p>
+      <p>ATM Digital Solutions &amp; Services</p>
+      <p>Contact: 08133515448</p>
+      <p class="muted">
+        Dictionary lookups, favourites and history are stored on this device.
+        No translation API is used.
+      </p>
+    </div>
+
     <button id="resetSettings" class="secondary">Reset settings</button>
   </section>
+
 </main>
-<footer>© ATM English Academy · ATM Digital Solutions &amp; Services</footer>
+
+<footer>
+  © ATM English Academy · ATM Digital Solutions &amp; Services
+</footer>
+
 <script src="dictionary-data.js"></script>
 <script src="dictionary-extra-batch-1.js"></script>
 <script src="dictionary.js"></script>
+
 </body>
 </html>
