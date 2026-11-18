@@ -46,6 +46,7 @@
     $("results").innerHTML=found.length?found.map(card).join(""):empty("No matching word in the installed dictionary yet.");
   }
   function renderAllWords(){
+    $("allWordsCount").textContent = "All Words function is running";
   const q=$("allWordsSearch").value.trim().toLowerCase();
 
   const list=words
