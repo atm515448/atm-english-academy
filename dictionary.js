@@ -408,32 +408,30 @@
     }
   }
 
-  // PAGE NAVIGATION - CORRECTED
-  function showPage(page) {
-    activePage = page;
+  // PAGE NAVIGATION
+function showPage(page) {
+  activePage = page;
 
-    document.querySelectorAll(".page").forEach(element => {
-      element.classList.toggle(
-        "active",
-        element.id === "page-" + page
-      );
-    });
+  document.querySelectorAll(".page").forEach(element => {
+    element.classList.toggle(
+      "active",
+      element.id === "page-" + page
+    );
+  });
 
-    document.querySelectorAll(".tab").forEach(button => {
-      button.classList.toggle(
-        "active",
-        button.dataset.page === page
-      );
-    });
+  document.querySelectorAll(".tab").forEach(button => {
+    button.classList.toggle(
+      "active",
+      button.dataset.page === page
+    );
+  });
 
-    if (page === "allwords") {
-      renderAllWords();
-    }
+  if (page === "allwords") renderAllWords();
 
-    if (page === "favorites" || page === "history") {
-      renderSaved();
-    }
+  if (page === "favorites" || page === "history") {
+    renderSaved();
   }
+}
 
   // DAILY WORD
   function renderDailyWord() {
@@ -640,10 +638,10 @@
   }
 
   // START APPLICATION
-  applySettings();
-  showPage("search");
-  search();
-  renderDailyWord();
+applySettings();
+showPage("search");
+search();
+renderDailyWord();
 
   console.log(
     `ATM English Academy ready: ${words.length} unique entries loaded.`
