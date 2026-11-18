@@ -1,7 +1,7 @@
 {
-  "name": "ATM English Academy Dictionary",
-  "short_name": "ATM Dictionary",
-  "description": "Offline English-Hausa and Hausa-English dictionary",
+  "name": "ATM English Academy",
+  "short_name": "ATM Academy",
+  "description": "Learn English, Hausa and Arabic with ATM English Academy.",
   "start_url": "./dictionary.html",
   "scope": "./",
   "display": "standalone",
