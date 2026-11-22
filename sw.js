@@ -1,12 +1,7 @@
-const CACHE_NAME = "atm-dictionary-v8";
+const CACHE_NAME = "atm-dictionary-v12";
 
 const CORE = [
   "./dictionary.html",
-  "./dictionary.css",
-  "./dictionary.js",
-  "./dictionary-data.js",
-  "./dictionary-extra-batch-1.js",
-  "./dictionary-words-1000.js",
   "./manifest.webmanifest",
   "./icon.svg",
   "./icon-192.png",
