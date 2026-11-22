@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0f2d5c">
-  <meta name="description" content="English–Hausa dictionary with flashcards, quizzes and offline use.">
+  <meta name="description" content="English–Hausa dictionary, phrasebook, flashcards and quizzes. Works offline.">
   <title>ATM English Academy</title>
 
   <link rel="manifest" href="./manifest.webmanifest">
@@ -18,11 +18,7 @@
 
     <header class="header">
       <div class="brand">
-        <div class="brand-logo">ATM</div>
-        <div>
-          <h1>ATM English Academy</h1>
-          <p>English ⇄ Hausa Dictionary</p>
-        </div>
+        <img class="logo" src="./logo.svg" alt="ATM Digital Service Solutions – Abdussalam Tahir Malumfashi, WhatsApp 08133515448" width="520" height="150">
       </div>
       <button id="themeQuick" class="icon-button" type="button" aria-label="Change theme">🌙</button>
     </header>
@@ -103,6 +99,38 @@
         <div id="quizArea" class="learn-area" hidden></div>
       </section>
 
+      <!-- VOCABULARY -->
+      <section id="page-vocab" class="page">
+        <div id="vocabHome">
+          <div class="section-heading">
+            <h2>Vocabulary</h2>
+            <p>English–Hausa Phrasebook • 10 topics</p>
+          </div>
+
+          <div class="book-credit">
+            <b>English–Hausa Phrasebook</b><br>
+            Author: Abdussalam Tahir Malumfashi • 08133515448
+          </div>
+
+          <input id="vocabSearch" type="search" placeholder="Search topics..." autocomplete="off" aria-label="Search topics">
+          <div id="vocabTopics" class="topic-grid"></div>
+        </div>
+
+        <div id="vocabDetail" hidden>
+          <button id="vocabBack" class="secondary-button" type="button">← All topics</button>
+          <div id="vocabHead"></div>
+
+          <div class="segmented" role="tablist">
+            <button class="seg active" data-vocab-mode="words" type="button">Words</button>
+            <button class="seg" data-vocab-mode="sentences" type="button">Sentences</button>
+          </div>
+
+          <input id="vocabFilter" type="search" placeholder="Filter this topic..." autocomplete="off" aria-label="Filter this topic">
+          <p id="vocabCount" class="count-label"></p>
+          <div id="vocabBody" class="word-list"></div>
+        </div>
+      </section>
+
       <!-- SAVED -->
       <section id="page-saved" class="page">
         <div class="section-heading">
@@ -173,10 +201,10 @@
     </main>
 
     <footer class="footer">
-      <h3>ATM English Academy</h3>
-      <p>Learn a new word every day.</p>
-      <p>Powered by ATM Digital Solutions &amp; Services</p>
-      <p>Contact: 08133515448</p>
+      <h3>ATM Digital Service Solutions</h3>
+      <p>Author: Abdussalam Tahir Malumfashi</p>
+      <p>📞 08133515448 • ✉️ <a href="mailto:atmdigitalservice@gmail.com">atmdigitalservice@gmail.com</a></p>
+      <p><a class="wa-link" href="https://whatsapp.com/channel/0029VbDxOkt72WU1LQgF6w05" target="_blank" rel="noopener">📢 Follow ATM Digital Solutions &amp; Services on WhatsApp</a></p>
       <small>© 2026 ATM English Academy. All rights reserved.</small>
     </footer>
 
@@ -185,6 +213,7 @@
   <nav class="bottom-nav" aria-label="Main navigation">
     <button class="tab active" data-page="search" type="button"><span class="ico">🔍</span><span>Search</span></button>
     <button class="tab" data-page="browse" type="button"><span class="ico">📖</span><span>Browse</span></button>
+    <button class="tab" data-page="vocab" type="button"><span class="ico">📚</span><span>Vocab</span></button>
     <button class="tab" data-page="learn" type="button"><span class="ico">🎯</span><span>Learn</span></button>
     <button class="tab" data-page="saved" type="button"><span class="ico">♥</span><span>My Words</span></button>
     <button class="tab" data-page="settings" type="button"><span class="ico">⚙️</span><span>Settings</span></button>
@@ -195,6 +224,7 @@
   <script src="dictionary-data.js"></script>
   <script src="dictionary-extra-batch-1.js"></script>
   <script src="dictionary-words-1000.js"></script>
+  <script src="phrasebook-data.js"></script>
   <script src="dictionary.js"></script>
 </body>
 </html>

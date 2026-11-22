@@ -305,7 +305,7 @@ body[data-theme="dark"] .primary-button { color: #0d1524; }
 /* BOTTOM NAV */
 .bottom-nav {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
-  display: grid; grid-template-columns: repeat(5, 1fr);
+  display: grid; grid-template-columns: repeat(6, 1fr);
   background: var(--surface); border-top: 1px solid var(--line);
   padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
   box-shadow: 0 -6px 20px rgba(0,0,0,.06);
@@ -347,3 +347,24 @@ body[data-theme="dark"] .primary-button { color: #0d1524; }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* PHRASEBOOK + LOGO */
+.logo { width: min(300px, 70vw); height: auto; display: block; border-radius: 14px; box-shadow: 0 6px 18px rgba(16,43,85,.22); }
+.topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.topic-card { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); color: var(--ink); }
+.topic-no { font-size: .72rem; font-weight: 800; color: #fff; background: var(--blue-2); border-radius: 999px; padding: 1px 9px; margin-bottom: 4px; }
+.topic-en { font-weight: 800; font-size: 1.05rem; color: var(--blue); }
+.topic-ha { color: var(--accent); font-weight: 700; font-size: .9rem; }
+.topic-count { color: var(--muted); font-size: .76rem; margin-top: 6px; }
+.book-credit { background: var(--surface); border: 1px solid var(--line); border-left: 5px solid var(--accent); border-radius: 14px; padding: 12px 14px; font-size: .88rem; color: var(--muted); margin: 0 0 14px; }
+.book-credit b { color: var(--ink); }
+.topic-title { margin: 6px 0 0; font-size: 1.5rem; color: var(--blue); }
+.pair-row { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 11px 12px; display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: center; }
+.pair-en { font-weight: 700; overflow-wrap: anywhere; }
+.pair-ha { color: var(--accent); font-weight: 600; overflow-wrap: anywhere; }
+.speak-btn.small { width: 34px; height: 34px; font-size: .95rem; }
+.wa-link { color: #128c7e; font-weight: 700; }
+body[data-theme="dark"] .wa-link { color: #25d366; }
+.footer a { color: var(--blue); }
+#vocabDetail #vocabFilter { margin-top: 6px; }
+@media (max-width: 480px) { .pair-row { grid-template-columns: 1fr auto; } .pair-ha { grid-column: 1 / -1; } }
