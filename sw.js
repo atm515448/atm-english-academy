@@ -1,5 +1,4 @@
-
-const CACHE_NAME = "atm-dictionary-v7";
+const CACHE_NAME = "atm-dictionary-v8";
 
 const CORE = [
   "./dictionary.html",
@@ -7,8 +6,11 @@ const CORE = [
   "./dictionary.js",
   "./dictionary-data.js",
   "./dictionary-extra-batch-1.js",
-  "./dictionary-arabic-batch-1.js",
-  "./manifest.webmanifest"
+  "./dictionary-words-1000.js",
+  "./manifest.webmanifest",
+  "./icon.svg",
+  "./icon-192.png",
+  "./icon-512.png"
 ];
 
 self.addEventListener("install", event => {
@@ -22,60 +24,47 @@ self.addEventListener("install", event => {
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
-      ))
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
-
   const request = event.request;
   const url = new URL(request.url);
+  if (url.origin !== location.origin) return;
 
-  const isAppFile =
-    url.pathname.endsWith(".html") ||
-    url.pathname.endsWith(".css") ||
-    url.pathname.endsWith(".js");
+  const isAppFile = /\.(html|css|js)$/.test(url.pathname) || url.pathname.endsWith("/");
 
-  event.respondWith(
-    (async () => {
-      if (isAppFile) {
-        try {
-          const response = await fetch(request);
-
-          if (response.ok) {
-            const cache = await caches.open(CACHE_NAME);
-            await cache.put(request, response.clone());
-          }
-
-          return response;
-        } catch (error) {
-          const cached = await caches.match(request);
-          if (cached) return cached;
-          throw error;
-        }
-      }
-
-      const cached = await caches.match(request);
-      if (cached) return cached;
-
+  event.respondWith((async () => {
+    if (isAppFile) {
+      // Network first so updates appear quickly, cache as the offline fallback
       try {
         const response = await fetch(request);
-
         if (response.ok) {
           const cache = await caches.open(CACHE_NAME);
           await cache.put(request, response.clone());
         }
-
         return response;
       } catch (error) {
+        const cached = await caches.match(request);
+        if (cached) return cached;
         return caches.match("./dictionary.html");
       }
-    })()
-  );
+    }
+
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    try {
+      const response = await fetch(request);
+      if (response.ok) {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(request, response.clone());
+      }
+      return response;
+    } catch (error) {
+      return caches.match("./dictionary.html");
+    }
+  })());
 });

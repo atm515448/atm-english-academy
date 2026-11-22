@@ -2,17 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#102b55">
-  <meta name="description" content="Learn English, Hausa and Arabic with ATM English Academy.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f2d5c">
+  <meta name="description" content="English–Hausa dictionary with flashcards, quizzes and offline use.">
   <title>ATM English Academy</title>
 
   <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icon-192.png">
   <link rel="stylesheet" href="./dictionary.css">
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -23,124 +21,109 @@
         <div class="brand-logo">ATM</div>
         <div>
           <h1>ATM English Academy</h1>
-          <p>English • Hausa • العربية</p>
+          <p>English ⇄ Hausa Dictionary</p>
         </div>
       </div>
-
-      <button id="themeQuick" class="icon-button" type="button" aria-label="Change theme">
-        🌙
-      </button>
+      <button id="themeQuick" class="icon-button" type="button" aria-label="Change theme">🌙</button>
     </header>
 
     <main>
-      <section class="welcome">
-        <p class="eyebrow">WELCOME TO YOUR LANGUAGE CENTRE</p>
-        <h2>Learn. Practise. Improve.</h2>
-        <p>Build your vocabulary in English, Hausa and Arabic.</p>
-      </section>
 
-      <nav class="tabs" aria-label="Main navigation">
-        <button class="tab active" data-page="search" type="button">Dictionary</button>
-        <button class="tab" data-page="allwords" type="button">All Words</button>
-        <button class="tab" data-page="quiz" type="button">Quiz</button>
-        <button class="tab" data-page="favorites" type="button">Favourites</button>
-        <button class="tab" data-page="history" type="button">History</button>
-        <button class="tab" data-page="settings" type="button">Settings</button>
-      </nav>
-
-      <!-- DICTIONARY PAGE -->
+      <!-- SEARCH -->
       <section id="page-search" class="page active">
 
-        <div id="dailyWord" class="daily-word"></div>
-
         <div class="search-panel">
-          <label for="direction">Choose translation direction</label>
-
-          <select id="direction">
-            <option value="en-ha">English → Hausa</option>
-            <option value="ha-en">Hausa → English</option>
-            <option value="en-ar">English → Arabic</option>
-            <option value="ar-en">Arabic → English</option>
-            <option value="ha-ar">Hausa → Arabic</option>
-            <option value="ar-ha">Arabic → Hausa</option>
-          </select>
-
-          <label for="searchInput">Search vocabulary</label>
-
-          <div class="search-box">
-            <input
-              id="searchInput"
-              type="search"
-              placeholder="Search English, Hausa or Arabic..."
-              autocomplete="off"
-            >
-            <button id="clearSearch" type="button">✕</button>
+          <div class="direction-row">
+            <span id="dirFrom" class="lang-pill">English</span>
+            <button id="swapDir" class="swap-btn" type="button" aria-label="Swap languages">⇄</button>
+            <span id="dirTo" class="lang-pill">Hausa</span>
           </div>
 
-          <p id="countLabel" class="count-label">Search for a word</p>
+          <div class="search-box">
+            <input id="searchInput" type="search" placeholder="Search a word..."
+                   autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search vocabulary">
+            <button id="clearSearch" type="button" aria-label="Clear search">✕</button>
+          </div>
+
+          <div class="filters">
+            <div id="levelChips" class="chips" role="group" aria-label="Level">
+              <button class="chip active" data-level="all" type="button">All levels</button>
+              <button class="chip" data-level="Beginner" type="button">Beginner</button>
+              <button class="chip" data-level="Intermediate" type="button">Intermediate</button>
+              <button class="chip" data-level="Advanced" type="button">Advanced</button>
+            </div>
+            <select id="typeFilter" aria-label="Part of speech">
+              <option value="all">All types</option>
+            </select>
+          </div>
+
+          <p id="countLabel" class="count-label"></p>
         </div>
 
+        <div id="dailyWord" class="daily-word"></div>
+        <div id="recentSearches" class="recent"></div>
         <div id="results" class="results"></div>
+        <div id="resultsMore" class="more-wrap"></div>
       </section>
 
-      <!-- ALL WORDS PAGE -->
-      <section id="page-allwords" class="page">
+      <!-- BROWSE -->
+      <section id="page-browse" class="page">
         <div class="section-heading">
-          <h2>All Vocabulary</h2>
-          <p>Explore available words in the dictionary.</p>
+          <h2>Browse A–Z</h2>
+          <p id="browseCount"></p>
+        </div>
+        <div id="letterStrip" class="letter-strip"></div>
+        <div id="browseList" class="word-list"></div>
+        <div id="browseMore" class="more-wrap"></div>
+      </section>
+
+      <!-- LEARN -->
+      <section id="page-learn" class="page">
+        <div class="section-heading">
+          <h2>Learn</h2>
+          <p>Practise with flashcards or take a quiz.</p>
         </div>
 
-        <input
-          id="allWordsSearch"
-          type="search"
-          placeholder="Find a word..."
-        >
-
-        <p id="allWordsCount" class="count-label"></p>
-        <div id="allWordsList" class="results"></div>
-      </section>
-
-      <!-- QUIZ PAGE -->
-      <section id="page-quiz" class="page">
-        <div class="section-heading">
-          <h2>English to Hausa Quiz</h2>
-          <p>Test your vocabulary knowledge.</p>
+        <div class="segmented" role="tablist">
+          <button id="modeFlash" class="seg active" type="button">Flashcards</button>
+          <button id="modeQuiz" class="seg" type="button">Quiz</button>
         </div>
 
-        <button id="quizStart" class="primary-button" type="button">
-          Start Quiz
-        </button>
-
-        <div id="quizQuestion"></div>
-        <div id="quizOptions"></div>
-        <div id="quizFeedback" aria-live="polite"></div>
-      </section>
-
-      <!-- FAVOURITES PAGE -->
-      <section id="page-favorites" class="page">
-        <div class="section-heading">
-          <h2>My Favourites</h2>
-          <p>Your saved vocabulary.</p>
+        <div class="learn-options">
+          <label for="learnLevel">Level</label>
+          <select id="learnLevel">
+            <option value="all">All levels</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+          </select>
         </div>
 
-        <div id="favoriteList" class="results"></div>
+        <div id="flashArea" class="learn-area"></div>
+        <div id="quizArea" class="learn-area" hidden></div>
       </section>
 
-      <!-- HISTORY PAGE -->
-      <section id="page-history" class="page">
+      <!-- SAVED -->
+      <section id="page-saved" class="page">
         <div class="section-heading">
-          <h2>Search History</h2>
-          <p>Previously searched words.</p>
+          <h2>My Words</h2>
+          <p>Saved words and your search history.</p>
         </div>
 
-        <button id="clearHistory" class="secondary-button" type="button">
-          Clear History
-        </button>
+        <div class="segmented">
+          <button id="savedTabFav" class="seg active" type="button">♥ Favourites</button>
+          <button id="savedTabHist" class="seg" type="button">History</button>
+        </div>
 
-        <div id="historyList" class="results"></div>
+        <div class="toolbar">
+          <button id="copyFavs" class="secondary-button" type="button">Copy list</button>
+          <button id="clearHistory" class="secondary-button" type="button" hidden>Clear history</button>
+        </div>
+
+        <div id="savedList" class="results"></div>
       </section>
 
-      <!-- SETTINGS PAGE -->
+      <!-- SETTINGS -->
       <section id="page-settings" class="page">
         <div class="section-heading">
           <h2>Settings</h2>
@@ -155,35 +138,42 @@
             <option value="dark">Dark mode</option>
           </select>
 
-          <label for="fontSize">Font size</label>
+          <label for="fontSize">Text size</label>
           <select id="fontSize">
             <option value="small">Small</option>
             <option value="medium">Medium</option>
             <option value="large">Large</option>
           </select>
 
-          <label for="voiceLang">Pronunciation language</label>
+          <label for="voiceLang">Pronunciation language (for auto-speak)</label>
           <select id="voiceLang">
             <option value="en">English</option>
             <option value="ha">Hausa</option>
-            <option value="ar">Arabic</option>
           </select>
 
           <label class="setting-check">
             <input id="autoSpeak" type="checkbox">
-            Automatically pronounce searched words
+            Pronounce the top result automatically
           </label>
 
-          <button id="resetSettings" class="secondary-button" type="button">
-            Reset Settings
-          </button>
+          <label class="setting-check">
+            <input id="showExamples" type="checkbox">
+            Show example sentences
+          </label>
+
+          <div class="settings-actions">
+            <button id="resetSettings" class="secondary-button" type="button">Reset settings</button>
+            <button id="clearAll" class="danger-button" type="button">Erase my saved data</button>
+          </div>
         </div>
+
+        <div id="aboutCard" class="settings-card about"></div>
       </section>
+
     </main>
 
     <footer class="footer">
       <h3>ATM English Academy</h3>
-      <p>English • Hausa • Arabic</p>
       <p>Learn a new word every day.</p>
       <p>Powered by ATM Digital Solutions &amp; Services</p>
       <p>Contact: 08133515448</p>
@@ -192,9 +182,19 @@
 
   </div>
 
-<script src="dictionary-data.js"></script>
-<script src="dictionary-extra-batch-1.js"></script>
-<script src="dictionary-arabic-batch-1.js"></script>
-<script src="dictionary.js"></script>
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <button class="tab active" data-page="search" type="button"><span class="ico">🔍</span><span>Search</span></button>
+    <button class="tab" data-page="browse" type="button"><span class="ico">📖</span><span>Browse</span></button>
+    <button class="tab" data-page="learn" type="button"><span class="ico">🎯</span><span>Learn</span></button>
+    <button class="tab" data-page="saved" type="button"><span class="ico">♥</span><span>My Words</span></button>
+    <button class="tab" data-page="settings" type="button"><span class="ico">⚙️</span><span>Settings</span></button>
+  </nav>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="dictionary-data.js"></script>
+  <script src="dictionary-extra-batch-1.js"></script>
+  <script src="dictionary-words-1000.js"></script>
+  <script src="dictionary.js"></script>
 </body>
-                                </html>
+</html>

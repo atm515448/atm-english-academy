@@ -1,24 +1,34 @@
-# ATM English Academy Dictionary add-on
+ATM ENGLISH ACADEMY - ENGLISH <-> HAUSA DICTIONARY (new version)
 
-This add-on provides a bilingual English ↔ Hausa dictionary with 104 starter entries.
+WHAT CHANGED
+- Arabic has been removed completely (screens, search, quiz, pronunciation, data file, manifest).
+- New look: search card with language switch (English <-> Hausa), level and type filters,
+  bottom navigation, dark mode, text size setting, new app icon.
+- Search is smarter: best matches first, finds Hausa words even if you type b, d, k instead of the hooked letters.
+- Browse A-Z, Flashcards ("I know it" / "Still learning"), 10-question Quiz (English->Hausa, Hausa->English, mixed) with score, streak and best score.
+- My Words: saved favourites (Copy list) and search history. Copy and Share buttons on every word.
+- 995 new difficult words with Hausa meanings added (dictionary-words-1000.js).
+  Total: 1,128 words.
 
-## Files
-- `dictionary.html`: dictionary page
-- `dictionary-data.js`: bundled vocabulary data (works without an API)
-- `dictionary.js`: search, direction switch, favourites, history and pronunciation
-- `dictionary.css`: responsive styling
-- `manifest.webmanifest`: install metadata
-- `sw.js`: offline cache
+FILES (upload ALL of them to the same folder / repository root)
+- dictionary.html, dictionary.css, dictionary.js
+- dictionary-data.js, dictionary-extra-batch-1.js, dictionary-words-1000.js
+- sw.js, manifest.webmanifest, icon.svg, icon-192.png, icon-512.png
 
-## Add to the existing `english-academy` GitHub repository
-1. Extract this ZIP.
-2. Upload all six files into the root of the existing `english-academy` repository (or into a folder named `dictionary`; if using a folder, change the relative paths in `manifest.webmanifest` and `sw.js` accordingly).
-3. Add a link or button to the academy home page: `<a href="dictionary.html">English–Hausa Dictionary</a>`.
-4. Commit the changes and wait for GitHub Pages to publish.
-5. Open the published site once while online, then use **Add to Home screen / Install app** in Chrome. Open the dictionary once so its files are cached.
+HOW TO UPDATE ON GITHUB
+1. Open your atm-english-academy repository, then Add file > Upload files.
+2. Upload every file listed above (replace the old ones).
+3. DELETE the old file dictionary-arabic-batch-1.js (it is no longer used).
+4. Commit, wait for GitHub Pages to publish, open dictionary.html once online.
+   The app then works offline. If you still see the old version, close and reopen the page once.
 
-## Offline notes
-The word list, search, saved words and search history work locally. No translation API, external font, CDN or network request is required for dictionary lookups. Browser speech synthesis depends on speech voices installed on the phone; Hausa voice availability varies by device and may require a voice to be downloaded in Android settings.
+ADDING MORE WORDS LATER
+Add entries to dictionary-data.js in this format (type and level are optional):
+{ "en": "word", "ha": "Hausa meaning", "type": "noun", "level": "Intermediate",
+  "definition": "short meaning", "exampleEn": "English sentence.", "exampleHa": "Jumlar Hausa." }
+For many simple words, add [English, Hausa] pairs to the list in dictionary-words-1000.js.
 
-## Expanding the dictionary
-Add entries to `dictionary-data.js` using the same fields: `en`, `ha`, `type`, `exampleEn`, `exampleHa`, `level`, and `definition`. Review Hausa wording with a fluent speaker before publishing large batches; some words have several context-dependent translations.
+NOTE
+Some English words have more than one Hausa meaning; the closest common one is given.
+Ask a fluent Hausa speaker to review before publishing large lists.
+Speech depends on the voices installed on the phone (a Hausa voice may not be available).

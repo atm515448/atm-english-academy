@@ -1,11 +1,15 @@
 {
   "name": "ATM English Academy",
   "short_name": "ATM Academy",
-  "description": "Learn English, Hausa and Arabic with ATM English Academy.",
+  "description": "English–Hausa dictionary with flashcards, quizzes and offline use.",
   "start_url": "./dictionary.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f3f6fb",
-  "theme_color": "#102b55",
-  "icons": []
+  "background_color": "#f2f5fb",
+  "theme_color": "#0f2d5c",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
 }
