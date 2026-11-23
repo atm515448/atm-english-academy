@@ -514,6 +514,25 @@ body[data-theme="dark"] .empty strong { color: var(--ink); }
 .bottom-nav .tab .ico { font-size: 1.7rem; }
 .bottom-nav .tab span:last-child { line-height: 1.1; }
   </style>
+<script>window.atmTrack = window.atmTrack || function () {};</script>
+<script type="module">
+/* Firebase Analytics for ATM English Academy. If it cannot load (offline or blocked), the app keeps working without it. */
+try {
+  const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js");
+  const { getAnalytics, logEvent } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js");
+  const app = initializeApp({
+    apiKey: "AIzaSyD4Dnmd3WscQ6fGLlAGxbSLdb7K4ScJpfU",
+    authDomain: "atm-english-academy.firebaseapp.com",
+    projectId: "atm-english-academy",
+    storageBucket: "atm-english-academy.firebasestorage.app",
+    messagingSenderId: "171532103394",
+    appId: "1:171532103394:web:f6cd0d6efbfb2e5869b8bb",
+    measurementId: "G-4PEPNZ3LZY"
+  });
+  const analytics = getAnalytics(app);
+  window.atmTrack = (name, params) => { try { logEvent(analytics, name, params || {}); } catch (e) {} };
+} catch (e) { /* analytics unavailable */ }
+</script>
 </head>
 
 <body>
@@ -5073,6 +5092,7 @@ window.ATM_PHRASEBOOK = (function () {
   function openWord(id) {
     const w = byId.get(id);
     if (!w) return;
+    window.atmTrack("word_open", { word: String(w.en || "").slice(0, 50) });
     levelFilter = "all"; typeFilter = "all";
     syncFilters();
     showPage("search");
@@ -5129,6 +5149,7 @@ window.ATM_PHRASEBOOK = (function () {
   function openTopic(no) {
     vocabTopic = book.find(t => String(t.no) === String(no));
     if (!vocabTopic) return;
+    window.atmTrack("topic_open", { topic: String(vocabTopic.en || "").slice(0, 50) });
     vocabMode = vocabTopic.words.length ? "words" : "sentences";
     $("vocabHome").hidden = true;
     $("vocabDetail").hidden = false;
@@ -5404,6 +5425,24 @@ window.ATM_PHRASEBOOK = (function () {
   document.getElementById("installClose").addEventListener("click", hide);
   window.addEventListener("appinstalled", function () { deferred = null; hide(); });
 })();
+</script>
+<script>
+/* Analytics events: taps and searches. Delegated, so existing handlers stay as they are. */
+document.addEventListener("click", e => {
+  const t = e.target;
+  const tab = t.closest && t.closest(".bottom-nav .tab");
+  if (tab) window.atmTrack("page_view", { page: tab.dataset.page || "" });
+  const vm = t.closest && t.closest("[data-vocab-mode]");
+  if (vm) window.atmTrack("vocab_view", { view: vm.dataset.vocabMode || "" });
+  if (t.closest && t.closest("#swapDir")) window.atmTrack("swap_direction", {});
+  if (t.closest && t.closest("#installYes")) window.atmTrack("install_accept", {});
+  if (t.closest && (t.closest("#installLater") || t.closest("#installClose"))) window.atmTrack("install_dismiss", {});
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.target && e.target.id === "searchInput") {
+    window.atmTrack("search", { term: String(e.target.value || "").trim().slice(0, 50) });
+  }
+});
 </script>
 </body>
 </html>
