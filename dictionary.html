@@ -5061,7 +5061,8 @@ window.ATM_PHRASEBOOK = (function () {
       <p><b>Author:</b> Abdussalam Tahir Malumfashi • 08133515448</p>
       <p><b>ATM Digital Service Solutions</b> • atmdigitalservice@gmail.com</p>
       <p><a class="wa-link" href="https://whatsapp.com/channel/0029VbDxOkt72WU1LQgF6w05" target="_blank" rel="noopener">📢 Follow our WhatsApp channel</a></p>
-      <p>Works offline after the first visit. Your saved data stays on this device.</p>`;
+      <p>Works offline after the first visit. Your saved data stays on this device.</p>
+      <p><b>Privacy:</b> The app records anonymous usage to help us improve it: which pages and words are opened, and how many letters a search has. It does not record the words you type in search, and it does not collect your name, phone number or email. Your saved words and progress stay on this device. Questions: atmdigitalservice@gmail.com</p>`;
   }
 
   /* ---------- NAVIGATION ---------- */
@@ -5440,7 +5441,11 @@ document.addEventListener("click", e => {
 });
 document.addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target && e.target.id === "searchInput") {
-    window.atmTrack("search", { term: String(e.target.value || "").trim().slice(0, 50) });
+    const typed = String(e.target.value || "").trim();
+    const q = typed.toLowerCase();
+    const matched = !!(window.ATM_DICTIONARY || []).some(w =>
+      String(w.en || "").toLowerCase() === q || String(w.ha || "").toLowerCase() === q);
+    window.atmTrack("search", { length: typed.length, matched: matched });
   }
 });
 </script>
