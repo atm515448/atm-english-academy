@@ -383,6 +383,128 @@ body[data-theme="dark"] .wa-link { color: #25d366; }
 #vocabDetail #vocabFilter { margin-top: 6px; }
 @media (max-width: 480px) { .pair-row { grid-template-columns: 1fr auto; } .pair-ha { grid-column: 1 / -1; } }
 
+
+/* ===== Modern refresh (v9) ===== */
+:root {
+  --bg: #eef3fb;
+  --surface: rgba(255, 255, 255, 0.92);
+  --surface-2: #f3f6fc;
+  --line: rgba(20, 35, 58, 0.08);
+  --shadow: 0 10px 30px rgba(18, 61, 117, 0.10);
+  --radius: 22px;
+  --grad: linear-gradient(135deg, #0f2d5c 0%, #1760a7 55%, #2a7bd1 100%);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a1220;
+    --surface: rgba(22, 33, 54, 0.92);
+    --surface-2: #1a2740;
+    --line: rgba(255, 255, 255, 0.08);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0a1220;
+  --surface: rgba(22, 33, 54, 0.92);
+  --surface-2: #1a2740;
+  --line: rgba(255, 255, 255, 0.08);
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: radial-gradient(1200px 500px at 10% -10%, rgba(42,123,209,.16), transparent 60%), var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+.header {
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  position: sticky; top: 8px; z-index: 20;
+}
+.header h1 { letter-spacing: .2px; }
+.logo, .brand-logo { box-shadow: 0 6px 18px rgba(18,61,117,.25); }
+.search-panel, .daily-word, .settings-card, .learn-area, .card, .word-card {
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--line);
+}
+.search-panel {
+  background: var(--grad);
+  color: #fff;
+  border: 0;
+  position: relative;
+  overflow: hidden;
+}
+.search-panel::after {
+  content: ""; position: absolute; right: -60px; top: -60px; width: 180px; height: 180px;
+  border-radius: 50%; background: rgba(255,255,255,.08); pointer-events: none;
+}
+.search-box input, input[type="search"] {
+  border-radius: 16px;
+  border: 1px solid transparent;
+  transition: box-shadow .2s, border-color .2s;
+}
+.search-box input:focus { box-shadow: 0 0 0 4px rgba(255,255,255,.35); outline: none; }
+.chip, .seg, .lang-pill, .secondary-button {
+  border-radius: 999px;
+  transition: transform .15s ease, background .2s ease;
+}
+.chip:active, .seg:active, .tab:active, .secondary-button:active { transform: scale(.96); }
+.seg.active, .chip.active { box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+.word-list .item, .results .item, .vocab-item {
+  border-radius: 16px;
+  transition: transform .15s ease, box-shadow .2s ease;
+}
+.word-list .item:hover, .results .item:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(18,61,117,.12); }
+.bottom-nav {
+  background: var(--surface) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--line) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 14px 40px rgba(10,20,40,.18);
+}
+.bottom-nav .tab { border-radius: 16px; }
+.bottom-nav .tab.active { background: var(--grad) !important; color: #fff !important; }
+.bottom-nav .tab.active .ico { filter: none; }
+.toast { border-radius: 16px; box-shadow: 0 12px 30px rgba(0,0,0,.25); }
+
+/* ===== Install card ===== */
+.install-card {
+  position: fixed; left: 50%; bottom: 96px; transform: translate(-50%, 140%);
+  width: min(440px, calc(100% - 24px));
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 22px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.28);
+  padding: 16px 16px 14px; z-index: 60;
+  transition: transform .35s cubic-bezier(.2,.8,.2,1), opacity .3s;
+  opacity: 0; display: flex; gap: 12px; align-items: flex-start;
+}
+.install-card.show { transform: translate(-50%, 0); opacity: 1; }
+.install-card[hidden] { display: none; }
+.install-icon {
+  flex: 0 0 52px; height: 52px; border-radius: 14px; background: var(--grad);
+  color: #fff; font-weight: 800; display: grid; place-items: center; font-size: 1.1rem;
+  box-shadow: 0 6px 16px rgba(18,61,117,.3);
+}
+.install-text { flex: 1; min-width: 0; }
+.install-text strong { display: block; font-size: 1rem; }
+.install-text p { margin: 4px 0 0; color: var(--muted); font-size: .88rem; line-height: 1.4; }
+.install-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.install-actions button {
+  border: 0; border-radius: 12px; padding: 9px 14px; font-weight: 700; cursor: pointer; font: inherit;
+}
+.install-yes { background: var(--grad); color: #fff; }
+.install-later { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line) !important; }
+.install-close {
+  flex: 0 0 auto; background: transparent; border: 0; color: var(--muted);
+  font-size: 1.2rem; cursor: pointer; padding: 2px 4px; line-height: 1;
+}
+
+.header img, .header .logo { border-radius: 50%; background: transparent; }
   </style>
 </head>
 
@@ -592,6 +714,18 @@ body[data-theme="dark"] .wa-link { color: #25d366; }
     <button class="tab" data-page="settings" type="button"><span class="ico">⚙️</span><span>Settings</span></button>
   </nav>
 
+  <div id="installCard" class="install-card" role="dialog" aria-live="polite" aria-label="Install app" hidden>
+    <div class="install-icon" aria-hidden="true">ATM</div>
+    <div class="install-text">
+      <strong>Install ATM English Academy</strong>
+      <p id="installText">Add it to your home screen to open it like an app, even offline.</p>
+      <div class="install-actions">
+        <button id="installYes" class="install-yes" type="button">Install app</button>
+        <button id="installLater" class="install-later" type="button">Not now</button>
+      </div>
+    </div>
+    <button id="installClose" class="install-close" type="button" aria-label="Close">✕</button>
+  </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script>
@@ -3531,6 +3665,61 @@ window.ATM_PHRASEBOOK = (function () {
   console.log(`ATM English Academy ready: ${words.length} unique entries loaded.`);
 })();
 
+</script>
+
+<script>
+/* Install prompt: Android/Chrome uses the browser prompt; iPhone shows how to add manually. */
+(function () {
+  var card = document.getElementById("installCard");
+  if (!card) return;
+  var KEY = "atmDict_installDismissed";
+  var DAYS = 7;
+  var deferred = null;
+  var standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+  function recentlyDismissed() {
+    try {
+      var t = Number(localStorage.getItem(KEY) || 0);
+      return t && (Date.now() - t) < DAYS * 86400000;
+    } catch (e) { return false; }
+  }
+  function remember() { try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {} }
+  function show() {
+    if (standalone || recentlyDismissed()) return;
+    card.hidden = false;
+    requestAnimationFrame(function () { card.classList.add("show"); });
+  }
+  function hide() {
+    remember();
+    card.classList.remove("show");
+    setTimeout(function () { card.hidden = true; }, 350);
+  }
+
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault();
+    deferred = e;
+    setTimeout(show, 3000);
+  });
+
+  if (isIOS && !standalone) {
+    document.getElementById("installText").textContent =
+      "Tap the Share button, then choose \u201cAdd to Home Screen\u201d.";
+    document.getElementById("installYes").hidden = true;
+    setTimeout(show, 4000);
+  }
+
+  document.getElementById("installYes").addEventListener("click", async function () {
+    if (!deferred) { hide(); return; }
+    deferred.prompt();
+    try { await deferred.userChoice; } catch (e) {}
+    deferred = null;
+    hide();
+  });
+  document.getElementById("installLater").addEventListener("click", hide);
+  document.getElementById("installClose").addEventListener("click", hide);
+  window.addEventListener("appinstalled", function () { deferred = null; hide(); });
+})();
 </script>
 </body>
 </html>

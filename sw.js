@@ -1,4 +1,4 @@
-const CACHE_NAME = "atm-dictionary-v13";
+const CACHE_NAME = "atm-dictionary-v14";
 
 const CORE = [
   "./dictionary.html",
