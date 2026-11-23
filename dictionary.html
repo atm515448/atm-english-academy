@@ -394,21 +394,11 @@ body[data-theme="dark"] .wa-link { color: #25d366; }
   --radius: 22px;
   --grad: linear-gradient(135deg, #0f2d5c 0%, #1760a7 55%, #2a7bd1 100%);
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0a1220;
-    --surface: rgba(22, 33, 54, 0.92);
-    --surface-2: #1a2740;
-    --line: rgba(255, 255, 255, 0.08);
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0a1220;
-  --surface: rgba(22, 33, 54, 0.92);
-  --surface-2: #1a2740;
-  --line: rgba(255, 255, 255, 0.08);
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+body[data-theme="dark"] {
+  --surface: rgba(22, 33, 54, 0.94);
+  --surface-2: #1b2a44;
+  --line: rgba(255, 255, 255, 0.10);
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
 body {
   font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -505,6 +495,11 @@ body {
 }
 
 .header img, .header .logo { border-radius: 50%; background: transparent; }
+.section-heading h2, .footer h3 { color: var(--ink); }
+body[data-theme="dark"] .footer h3 { color: var(--blue); }
+body[data-theme="dark"] .secondary-button, body[data-theme="dark"] .toolbar .secondary-button { background: var(--surface-2); color: var(--ink); }
+body[data-theme="dark"] .empty { color: var(--muted); }
+body[data-theme="dark"] .empty strong { color: var(--ink); }
   </style>
 </head>
 
