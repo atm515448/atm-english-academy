@@ -1,11 +1,11 @@
-const CACHE_NAME = "atm-dictionary-v20";
+const CACHE_NAME = "atm-dictionary-v21";
 
 const CORE = [
   "./dictionary.html",
   "./manifest.webmanifest",
-  "./icon.svg",
-  "./icon-192.png",
-  "./icon-512.png"
+  "./icon-logo.svg",
+  "./icon-logo-192.png",
+  "./icon-logo-512.png"
 ];
 
 self.addEventListener("install", event => {
