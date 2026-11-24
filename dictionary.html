@@ -347,6 +347,20 @@ body[data-theme="dark"] .primary-button { color: #0d1524; }
 .about-btn { display: block; box-sizing: border-box; width: 100%; text-align: center; padding: 12px 14px; margin-top: 10px; border-radius: 12px; font-weight: 800; text-decoration: none; background: var(--blue); color: #fff; border: 0; cursor: pointer; }
 .about-btn.alt { background: #ffc947; color: #2a2400; }
 .about-stack a { color: var(--blue); }
+/* SUGGESTIONS, DAILY QUIZ, DAILY WORD SETTING */
+.suggestions { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
+.suggestions[hidden] { display: none; }
+.sugg { border: 1px solid var(--line); border-radius: 12px; background: transparent; color: inherit; padding: 6px 10px; cursor: pointer; font: inherit; text-align: left; }
+.sugg small { display: block; color: var(--muted); font-size: .8rem; }
+.daily-quiz { margin-top: 12px; }
+.daily-quiz[hidden] { display: none; }
+.daily-quiz h3 { margin: 4px 0 10px; color: var(--ink); }
+.quiz-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.quiz-choice { border: 1px solid var(--line); border-radius: 12px; background: transparent; color: inherit; padding: 10px; cursor: pointer; font: inherit; }
+.quiz-choice.right { background: rgba(38, 163, 96, .2); border-color: #26a360; }
+.quiz-choice.wrong { background: rgba(220, 53, 69, .15); border-color: #dc3545; }
+.quiz-choice:disabled { cursor: default; }
+.quiz-result { font-weight: 700; min-height: 1.4em; }
 /* FOOTER */
 .footer { text-align: center; padding: 26px 10px 10px; margin-top: 10px; border-top: 1px solid var(--line); color: var(--muted); font-size: .8rem; }
 .footer h3 { color: var(--blue); margin: 0 0 4px; }
@@ -517,8 +531,8 @@ body[data-theme="dark"] .empty strong { color: var(--ink); }
 #vocabBody { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 @media (max-width: 340px) { .topic-grid, #vocabBody { grid-template-columns: 1fr !important; } }
 #vocabCount { color: var(--muted); font-weight: 600; }
-.bottom-nav .tab { font-size: .72rem; font-weight: 800; padding: 5px 2px; }
-.bottom-nav .tab .ico { font-size: 1.05rem; }
+.bottom-nav .tab { font-size: .78rem; font-weight: 800; padding: 5px 2px; }
+.bottom-nav .tab .ico { font-size: 1.4rem; }
 .bottom-nav .tab span:last-child { line-height: 1.1; }
   </style>
 <script>window.atmTrack = window.atmTrack || function () {};</script>
@@ -570,6 +584,7 @@ try {
                    autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Search vocabulary">
             <button id="clearSearch" type="button" aria-label="Clear search">✕</button>
           </div>
+          <div id="suggestions" class="suggestions" hidden></div>
 
           <div class="filters">
             <div id="levelChips" class="chips" role="group" aria-label="Level">
@@ -609,6 +624,8 @@ try {
           <h2>Learn</h2>
           <p>Practise with flashcards or take a quiz.</p>
         </div>
+
+        <div id="dailyQuiz" class="card daily-quiz"></div>
 
         <div class="segmented" role="tablist">
           <button id="modeFlash" class="seg active" type="button">Flashcards</button>
@@ -718,6 +735,11 @@ try {
             <input id="showExamples" type="checkbox">
             Show example sentences
           </label>
+
+          <div class="settings-card">
+            <label><input id="dailyNotify" type="checkbox"> 🔔 Send me today's word each morning</label>
+            <p class="muted">Works when the app is opened, and in the background where the phone allows it.</p>
+          </div>
 
           <div class="settings-actions">
             <button id="resetSettings" class="secondary-button" type="button">Reset settings</button>
@@ -4890,6 +4912,7 @@ window.ATM_PHRASEBOOK = (function () {
     if (showHome) {
       $("countLabel").textContent = `${pool.length.toLocaleString()} words ready • works offline`;
       lists.results.items = [];
+      renderSuggestions([]);
       $("results").innerHTML = "";
       $("resultsMore").innerHTML = "";
       renderRecent();
@@ -4906,6 +4929,7 @@ window.ATM_PHRASEBOOK = (function () {
       .map(x => x.w);
 
     lists.results.items = found;
+    renderSuggestions(found.slice(0, 6));
     lists.results.shown = PAGE;
 
     $("countLabel").textContent = found.length
@@ -5241,6 +5265,149 @@ window.ATM_PHRASEBOOK = (function () {
   on("aboutCard", "click", e => {
     if (e.target.closest && e.target.closest("#shareAppBtn")) shareApp();
   });
+
+  /* ---------- SUGGESTIONS, DAILY WORD, DAILY QUIZ ---------- */
+  const DAILY_CACHE = "atm-dictionary-daily";
+  const DAILY_URL = "./__daily-word__.json";
+  let quizOptions = [];
+  let quizCorrect = "";
+  let quizAnswered = false;
+
+  function dayIndex() {
+    const d = new Date();
+    return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+  }
+  function dayStamp() {
+    const d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function todayWord() {
+    return words.length ? words[dayIndex() % words.length] : null;
+  }
+
+  function renderSuggestions(list) {
+    const box = $("suggestions");
+    if (!box) return;
+    box.hidden = !list.length;
+    box.innerHTML = list.map(w => `<button class="sugg" type="button" data-sugg="${esc(w.id)}">${esc(w.en)}<small>${esc(w.ha || "")}</small></button>`).join("");
+  }
+
+  function renderDailyQuiz() {
+    const box = $("dailyQuiz");
+    if (!box) return;
+    const w = todayWord();
+    if (!w || !w.ha) { box.hidden = true; return; }
+    box.hidden = false;
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem("atmDailyQuiz") || "null"); } catch (e) {}
+    quizAnswered = !!(saved && saved.day === dayStamp());
+    const distinct = [...new Set(words.filter(x => x.ha && x.ha !== w.ha).map(x => x.ha))];
+    const pick = [];
+    let k = dayIndex();
+    for (let i = 0; pick.length < 3 && i < distinct.length * 2; i++) {
+      k = (k * 7919 + 13) % distinct.length;
+      if (!pick.includes(distinct[k])) pick.push(distinct[k]);
+    }
+    const options = [w.ha, ...pick];
+    const shift = dayIndex() % options.length;
+    quizOptions = options.slice(shift).concat(options.slice(0, shift));
+    quizCorrect = w.ha;
+    box.innerHTML = `
+      <div class="meta">Quiz of the day / Tambayar yau</div>
+      <h3>What is the Hausa meaning of “${esc(w.en)}”?</h3>
+      <div class="quiz-choices">${quizOptions.map((o, i) => `<button type="button" class="quiz-choice" data-quiz="${i}" ${quizAnswered ? "disabled" : ""}>${esc(o)}</button>`).join("")}</div>
+      <p id="dailyQuizResult" class="quiz-result" aria-live="polite">${quizAnswered ? (saved.correct ? "✅ Daidai! Correct." : "❌ Not quite. Answer: " + esc(quizCorrect)) : ""}</p>`;
+  }
+
+  function answerQuiz(i) {
+    if (quizAnswered || i < 0 || i >= quizOptions.length) return;
+    const ok = quizOptions[i] === quizCorrect;
+    quizAnswered = true;
+    try { localStorage.setItem("atmDailyQuiz", JSON.stringify({ day: dayStamp(), correct: ok })); } catch (e) {}
+    document.querySelectorAll("[data-quiz]").forEach(b => {
+      b.disabled = true;
+      if (b.textContent === quizCorrect) b.classList.add("right");
+    });
+    const chosen = document.querySelector(`[data-quiz="${i}"]`);
+    if (chosen && !ok) chosen.classList.add("wrong");
+    $("dailyQuizResult").textContent = ok ? "✅ Daidai! Correct." : "❌ Not quite. Answer: " + quizCorrect;
+  }
+
+  function dailyNotifyOn() {
+    try { return localStorage.getItem("atmDailyNotify") === "1"; } catch (e) { return false; }
+  }
+
+  // The service worker reads today's word from this cache, so it can send the reminder in the background.
+  async function publishDailyWord() {
+    const w = todayWord();
+    if (!w || !("caches" in window)) return;
+    try {
+      const cache = await caches.open(DAILY_CACHE);
+      await cache.put(DAILY_URL, new Response(JSON.stringify({ day: dayStamp(), en: w.en, ha: w.ha || "", on: dailyNotifyOn() }), { headers: { "Content-Type": "application/json" } }));
+    } catch (e) {}
+  }
+
+  async function showDailyNotification(force) {
+    if (!dailyNotifyOn() || !("Notification" in window) || Notification.permission !== "granted") return;
+    const stamp = dayStamp();
+    try { if (!force && localStorage.getItem("atmDailyShown") === stamp) return; } catch (e) {}
+    const w = todayWord();
+    if (!w || !("serviceWorker" in navigator)) return;
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      await reg.showNotification("Word of the day: " + w.en, {
+        body: (w.ha ? w.ha + " — " : "") + "Open the dictionary to learn it.",
+        tag: "atm-daily-word",
+        icon: "icon-logo-192.png",
+        badge: "icon-logo-192.png",
+        data: { url: "./" }
+      });
+      localStorage.setItem("atmDailyShown", stamp);
+    } catch (e) {}
+  }
+
+  async function setDailyNotify(on) {
+    if (on) {
+      if (!("Notification" in window)) { toast("Notifications are not supported on this browser."); return false; }
+      if (Notification.permission === "default") await Notification.requestPermission();
+      if (Notification.permission !== "granted") { toast("Notifications are blocked. Allow them in your phone settings."); return false; }
+    }
+    try { localStorage.setItem("atmDailyNotify", on ? "1" : "0"); } catch (e) {}
+    await publishDailyWord();
+    if (on) {
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        if (reg.periodicSync) {
+          const st = await navigator.permissions.query({ name: "periodic-background-sync" });
+          if (st.state === "granted") await reg.periodicSync.register("atm-daily-word", { minInterval: 24 * 60 * 60 * 1000 });
+        }
+      } catch (e) {}
+      showDailyNotification(true);
+    }
+    return true;
+  }
+
+  document.addEventListener("click", e => {
+    const sugg = e.target.closest && e.target.closest("[data-sugg]");
+    if (sugg) { openWord(sugg.dataset.sugg); return; }
+    const choice = e.target.closest && e.target.closest("[data-quiz]");
+    if (choice) { answerQuiz(Number(choice.dataset.quiz)); return; }
+    const learnTab = e.target.closest && e.target.closest(".bottom-nav .tab[data-page='learn']");
+    if (learnTab) setTimeout(renderDailyQuiz, 0);
+  });
+
+  const dailyBox = $("dailyNotify");
+  if (dailyBox) {
+    dailyBox.checked = dailyNotifyOn();
+    dailyBox.addEventListener("change", async () => {
+      const ok = await setDailyNotify(dailyBox.checked);
+      if (!ok) dailyBox.checked = false;
+    });
+  }
+
+  renderDailyQuiz();
+  publishDailyWord();
+  showDailyNotification(false);
 
   /* ---------- NAVIGATION ---------- */
   function syncDirection() {

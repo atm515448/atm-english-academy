@@ -1,4 +1,4 @@
-const CACHE_NAME = "atm-dictionary-v32";
+const CACHE_NAME = "atm-dictionary-v34";
 
 const CORE = [
   "./dictionary.html",
@@ -20,7 +20,7 @@ self.addEventListener("install", event => {
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME && k !== "atm-dictionary-daily").map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -62,5 +62,39 @@ self.addEventListener("fetch", event => {
     } catch (error) {
       return caches.match("./dictionary.html");
     }
+  })());
+});
+
+/* ---------- DAILY WORD REMINDER ---------- */
+self.addEventListener("periodicsync", event => {
+  if (event.tag === "atm-daily-word") event.waitUntil(showDailyWordFromCache());
+});
+
+async function showDailyWordFromCache() {
+  try {
+    const cache = await caches.open("atm-dictionary-daily");
+    const res = await cache.match("./__daily-word__.json");
+    if (!res) return;
+    const data = await res.json();
+    if (!data.on || self.Notification.permission !== "granted") return;
+    const title = data.en ? "Word of the day: " + data.en : "Your word of the day is ready";
+    await self.registration.showNotification(title, {
+      body: (data.ha ? data.ha + " — " : "") + "Open the dictionary to learn it.",
+      tag: "atm-daily-word",
+      icon: "icon-logo-192.png",
+      badge: "icon-logo-192.png",
+      data: { url: "./" }
+    });
+  } catch (e) {}
+}
+
+self.addEventListener("notificationclick", event => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    const list = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+    for (const client of list) {
+      if ("focus" in client) return client.focus();
+    }
+    if (self.clients.openWindow) return self.clients.openWindow("./");
   })());
 });
