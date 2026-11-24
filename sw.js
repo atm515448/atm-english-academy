@@ -1,4 +1,4 @@
-const CACHE_NAME = "atm-dictionary-v34";
+const CACHE_NAME = "atm-dictionary-v35";
 
 const CORE = [
   "./dictionary.html",
@@ -35,19 +35,17 @@ self.addEventListener("fetch", event => {
 
   event.respondWith((async () => {
     if (isAppFile) {
-      // Network first so updates appear quickly, cache as the offline fallback
-      try {
-        const response = await fetch(request);
+      // Open from the saved copy at once; fetch the newest copy in the background for next time.
+      const cached = await caches.match(request);
+      const network = fetch(request).then(async response => {
         if (response.ok) {
           const cache = await caches.open(CACHE_NAME);
           await cache.put(request, response.clone());
         }
         return response;
-      } catch (error) {
-        const cached = await caches.match(request);
-        if (cached) return cached;
-        return caches.match("./dictionary.html");
-      }
+      }).catch(() => null);
+      if (cached) { event.waitUntil(network); return cached; }
+      return (await network) || caches.match("./dictionary.html");
     }
 
     const cached = await caches.match(request);
